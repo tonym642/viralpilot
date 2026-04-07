@@ -147,6 +147,125 @@ ${parts.join('\n')}
 }
 
 /**
+ * AI Insights type — generated when strategy is saved.
+ */
+export type AiInsights = {
+  coreObjective?: string
+  audienceInsight?: string
+  toneAndEnergy?: string[]
+  contentAngles?: string[]
+  hookDirections?: string[]
+}
+
+/**
+ * Build an AI Insights prompt block for content generation.
+ * Provides structured creative intelligence to guide output quality.
+ */
+export function buildInsightsPromptBlock(insights: AiInsights | null): string {
+  if (!insights) return ''
+
+  const parts: string[] = ['--- AI INSIGHTS ---']
+  parts.push('Use these AI-generated insights to guide your creative output:\n')
+
+  if (insights.coreObjective) {
+    parts.push(`Core Objective: ${insights.coreObjective}`)
+    parts.push('→ Stay aligned with this campaign goal in all content.\n')
+  }
+
+  if (insights.audienceInsight) {
+    parts.push(`Audience Insight: ${insights.audienceInsight}`)
+    parts.push('→ Make content relevant and resonant for this audience.\n')
+  }
+
+  if (insights.toneAndEnergy?.length) {
+    parts.push(`Tone & Energy: ${insights.toneAndEnergy.join(', ')}`)
+    parts.push('→ Shape wording, mood, and emotional feel to match.\n')
+  }
+
+  if (insights.contentAngles?.length) {
+    parts.push('Content Angles:')
+    for (const angle of insights.contentAngles) {
+      parts.push(`  - ${angle}`)
+    }
+    parts.push('→ Use these as concept inspiration for the content piece.\n')
+  }
+
+  if (insights.hookDirections?.length) {
+    parts.push('Hook Directions:')
+    for (const hook of insights.hookDirections) {
+      parts.push(`  - ${hook}`)
+    }
+    parts.push('→ Use these to inspire the opening line / attention grab.\n')
+  }
+
+  parts.push('--- END INSIGHTS ---')
+  return parts.join('\n')
+}
+
+/**
+ * Generate AI insights from strategy fields. Calls OpenAI.
+ */
+export async function generateAiInsights(answers: Record<string, string | null | undefined>): Promise<AiInsights | null> {
+  const strategyText = [
+    answers.goal && `Goal: ${answers.goal}`,
+    answers.audience && `Audience: ${answers.audience}`,
+    answers.tone && `Tone: ${answers.tone}`,
+    answers.content_style && `Content Style: ${answers.content_style}`,
+    answers.platform_focus && `Platform Focus: ${answers.platform_focus}`,
+    answers.cta && `CTA: ${answers.cta}`,
+    answers.song_meaning && `Song/Brand Story: ${answers.song_meaning}`,
+    answers.differentiator && `Differentiator: ${answers.differentiator}`,
+  ].filter(Boolean).join('\n')
+
+  if (!strategyText) return null
+
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: `You are ViralPilot, an expert content strategist. Analyze the following strategy inputs and return a JSON object with these exact keys:
+
+{
+  "coreObjective": "1-2 sentence summary of what this project is trying to achieve",
+  "audienceInsight": "1-2 sentence description of who this content is for and what resonates with them",
+  "toneAndEnergy": ["tag1", "tag2", "tag3", "tag4"],
+  "contentAngles": ["angle 1", "angle 2", "angle 3", "angle 4", "angle 5"],
+  "hookDirections": ["hook idea 1", "hook idea 2", "hook idea 3", "hook idea 4", "hook idea 5"]
+}
+
+Rules:
+- toneAndEnergy should be 3-5 short descriptive tags
+- contentAngles should be 3-5 specific content ideas
+- hookDirections should be 3-5 opening line concepts or attention-grabbing angles
+- Be specific and actionable, not generic
+- Return ONLY valid JSON, no markdown`
+          },
+          { role: 'user', content: strategyText },
+        ],
+      }),
+    })
+
+    if (!res.ok) return null
+
+    const data = await res.json()
+    const raw = data.choices?.[0]?.message?.content || ''
+    const cleaned = raw.replace(/```json\n?|```\n?/g, '').trim()
+    return JSON.parse(cleaned) as AiInsights
+  } catch (e) {
+    console.error('Generate insights error:', e)
+    return null
+  }
+}
+
+/**
  * V1 project modes.
  */
 export type ProjectMode = 'Music' | 'Athlete'

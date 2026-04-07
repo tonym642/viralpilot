@@ -19,7 +19,7 @@
 
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/src/lib/supabaseAdmin'
-import { buildStrategyPromptBlock, buildMusicContextPromptBlock, isMusicMode, type StructuredStrategy } from '@/src/lib/strategy'
+import { buildStrategyPromptBlock, buildMusicContextPromptBlock, buildInsightsPromptBlock, isMusicMode, type StructuredStrategy, type AiInsights } from '@/src/lib/strategy'
 
 function parseSection(raw: string, key: string, nextKey: string | null): string {
   const start = raw.indexOf(key + ':')
@@ -49,17 +49,19 @@ export async function POST(request: Request) {
 
   const projectMode = proj?.mode || null
 
-  // Fetch strategy data for this project
+  // Fetch strategy data and AI insights for this project
   const { data: interview } = await supabaseAdmin
     .from('project_interviews')
-    .select('raw_strategy_text, structured_strategy, context_summary')
+    .select('raw_strategy_text, structured_strategy, context_summary, ai_insights')
     .eq('project_id', projectId)
     .limit(1)
     .single()
 
   const rawStrategy = interview?.raw_strategy_text || interview?.context_summary || null
   const structured = (interview?.structured_strategy as StructuredStrategy) || null
+  const insights = (interview?.ai_insights as AiInsights) || null
   const strategyBlock = buildStrategyPromptBlock(rawStrategy, structured)
+  const insightsBlock = buildInsightsPromptBlock(insights)
 
   // Include lyrics for Music mode projects
   let musicBlock = ''
@@ -69,22 +71,22 @@ export async function POST(request: Request) {
 
   const systemPrompt = `You are ViralPilot, an expert content strategist.
 
-${strategyBlock ? `Use the following project strategy to guide your content. Match the tone, audience, CTA style, and brand angle.\n\n${strategyBlock}\n\n` : ''}${musicBlock ? `${musicBlock}\n\n` : ''}Generate content for this plan item. Return ONLY the structured output below with no extra commentary:
+${strategyBlock ? `Use the following project strategy to guide your content. Match the tone, audience, CTA style, and brand angle.\n\n${strategyBlock}\n\n` : ''}${insightsBlock ? `${insightsBlock}\n\n` : ''}${musicBlock ? `${musicBlock}\n\n` : ''}Generate content for this plan item. Return ONLY the structured output below with no extra commentary:
 
 HOOK:
-(a short attention-grabbing opening line that matches the strategy's tone)
+(a short attention-grabbing opening line — use Hook Directions from insights if available)
 
 SCRIPT:
-(a short script or scene direction, 2-4 sentences, aligned with strategy goals)
+(a short script or scene direction, 2-4 sentences — aligned with Core Objective and Content Angles)
 
 CAPTION:
-(a social media caption, 1-2 sentences, targeting the strategy's audience)
+(a social media caption, 1-2 sentences — written for the target audience from Audience Insight)
 
 HASHTAGS:
 (5-8 relevant hashtags)
 
 VISUAL_DIRECTION:
-(brief visual/aesthetic direction, 1-2 sentences)`
+(brief visual/aesthetic direction, 1-2 sentences — match Tone & Energy)`
 
   const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',

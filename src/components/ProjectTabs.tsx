@@ -7,6 +7,8 @@ import ContentLibrary from './ContentLibrary'
 import MusicInterview from './MusicInterview'
 import StrategyPanel from './StrategyPanel'
 import MusicAssetsPanel from './MusicAssetsPanel'
+import HelpButton from './HelpModal'
+import { helpContent } from '@/src/lib/helpContent'
 
 type Plan = {
   id: string
@@ -69,6 +71,7 @@ export default function ProjectTabs({
   interviewData = null,
   strategyUpdatedAt = null,
   planGeneratedAt = null,
+  strategyStatus: initialStrategyStatus = null,
 }: {
   project: Project
   plans: Plan[]
@@ -78,9 +81,11 @@ export default function ProjectTabs({
   interviewData?: Record<string, unknown> | null
   strategyUpdatedAt?: string | null
   planGeneratedAt?: string | null
+  strategyStatus?: string | null
 }) {
   const [interviewDone, setInterviewDone] = useState(initialInterviewCompleted)
-  const [active, setActive] = useState<TabKey>('plan')
+  const [currentStrategyStatus, setCurrentStrategyStatus] = useState(initialStrategyStatus)
+  const [active, setActive] = useState<TabKey>('strategy')
   const [platformFilter, setPlatformFilter] = useState<string>('All')
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(
     plans.length > 0 ? plans[0].id : null
@@ -110,6 +115,7 @@ export default function ProjectTabs({
   const hasStrategy = !!interviewData?.interview_completed
   const hasPlan = plans.length > 0
   const isMusicProject = project.mode === 'Music'
+  const strategyApproved = currentStrategyStatus === 'approved'
 
   // Extract strategy summary fields for display
   const strategySummary = hasStrategy ? {
@@ -224,6 +230,7 @@ export default function ProjectTabs({
       <div
         style={{
           display: 'flex',
+          alignItems: 'center',
           gap: '4px',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
           marginBottom: '14px',
@@ -255,6 +262,10 @@ export default function ProjectTabs({
             {tab.label}
           </button>
         ))}
+        <span style={{ flex: 1 }} />
+        {helpContent[active] && (
+          <HelpButton pageKey={active} content={helpContent[active]} />
+        )}
       </div>
 
       {/* Tab content */}
@@ -270,6 +281,7 @@ export default function ProjectTabs({
               projectName={project.name}
               initialLyrics={project.lyrics_text || null}
               initialSongStyle={project.song_style || null}
+              highlightMissing={!project.lyrics_text || !project.song_style}
             />
           ) : (
             <div style={{ overflowY: 'auto', scrollbarWidth: 'none' }}>
@@ -281,7 +293,22 @@ export default function ProjectTabs({
           )
         )}
 
-        {active === 'plan' && !interviewDone && (
+        {active === 'plan' && !strategyApproved && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, textAlign: 'center', padding: '40px 20px' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px', fontSize: '18px', color: 'rgba(255,255,255,0.25)' }}>
+              🔒
+            </div>
+            <h2 style={{ margin: '0 0 6px 0', fontSize: '16px', fontWeight: 700 }}>Content Plan Locked</h2>
+            <p className="muted" style={{ margin: '0 0 16px 0', fontSize: '13px', maxWidth: '360px', lineHeight: '1.6' }}>
+              Complete and approve your strategy before generating a content plan.
+            </p>
+            <button className="btn-primary" onClick={() => setActive('strategy')}>
+              Go to Strategy
+            </button>
+          </div>
+        )}
+
+        {active === 'plan' && strategyApproved && !interviewDone && (
           <MusicInterview
             projectId={project.id}
             projectName={project.name}
@@ -291,7 +318,7 @@ export default function ProjectTabs({
           />
         )}
 
-        {active === 'plan' && interviewDone && (
+        {active === 'plan' && strategyApproved && interviewDone && (
           <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
             {/* Strategy summary banner */}
             {hasStrategy && hasPlan && !planIsOutdated && (
@@ -406,7 +433,20 @@ export default function ProjectTabs({
 
                 <div style={{ flex: 1, overflowY: 'auto', scrollbarWidth: 'none' }}>
                   {plans.length === 0 ? (
-                    <p className="muted" style={{ margin: 0, fontSize: '13px' }}>No plan yet.</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, textAlign: 'center', padding: '30px 20px' }}>
+                      <p style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: 600, color: '#eef1f6' }}>
+                        Ready to generate your content plan
+                      </p>
+                      <p className="muted" style={{ margin: '0 0 14px 0', fontSize: '12px', maxWidth: '280px', lineHeight: '1.5' }}>
+                        Your approved strategy will guide every day of the plan.
+                      </p>
+                      <GeneratePlanButton
+                        projectId={project.id}
+                        projectName={project.name}
+                        projectMode={project.mode || ''}
+                        description={project.description || ''}
+                      />
+                    </div>
                   ) : filteredPlans.length === 0 ? (
                     <p className="muted" style={{ margin: 0, fontSize: '13px' }}>No items for this platform.</p>
                   ) : (
@@ -666,6 +706,9 @@ export default function ProjectTabs({
             project={project}
             interview={interviewData as Record<string, string | boolean | null> | null}
             onSwitchToPlan={() => setActive('plan')}
+            onSwitchToAssets={() => setActive('assets')}
+            onStrategyApproved={() => setCurrentStrategyStatus('approved')}
+            messages={messages.map((m) => ({ id: m.id, role: m.role, content: m.content }))}
           />
         )}
 

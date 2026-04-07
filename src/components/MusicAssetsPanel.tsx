@@ -7,11 +7,13 @@ export default function MusicAssetsPanel({
   projectName,
   initialLyrics,
   initialSongStyle,
+  highlightMissing = false,
 }: {
   projectId: string
   projectName: string
   initialLyrics: string | null
   initialSongStyle: string | null
+  highlightMissing?: boolean
 }) {
   const [lyrics, setLyrics] = useState(initialLyrics || '')
   const [savedLyrics, setSavedLyrics] = useState(initialLyrics || '')
@@ -116,7 +118,7 @@ export default function MusicAssetsPanel({
         <div style={{
           position: 'relative',
           borderRadius: '8px',
-          border: `1px solid ${isDirty ? 'rgba(90,154,245,0.3)' : savedLyrics ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.06)'}`,
+          border: `1px solid ${isDirty ? 'rgba(90,154,245,0.3)' : savedLyrics ? 'rgba(74,222,128,0.15)' : highlightMissing && !lyrics ? 'rgba(251,191,36,0.3)' : 'rgba(255,255,255,0.06)'}`,
           background: 'rgba(13,19,30,0.6)',
           transition: 'border-color 0.2s',
           flex: 1,
@@ -187,7 +189,7 @@ export default function MusicAssetsPanel({
               lineHeight: '1.6',
               color: '#c8d1de',
               background: 'rgba(13,19,30,0.6)',
-              border: `1px solid ${songStyle !== savedSongStyle ? 'rgba(90,154,245,0.3)' : savedSongStyle ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.06)'}`,
+              border: `1px solid ${songStyle !== savedSongStyle ? 'rgba(90,154,245,0.3)' : savedSongStyle ? 'rgba(74,222,128,0.15)' : highlightMissing && !songStyle ? 'rgba(251,191,36,0.3)' : 'rgba(255,255,255,0.06)'}`,
               borderRadius: '8px',
               outline: 'none',
               resize: 'vertical',

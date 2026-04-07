@@ -1,16 +1,17 @@
-/*
-  Required Supabase table — run this SQL in the Supabase SQL Editor:
-
-  create table project_messages (
-    id uuid primary key default gen_random_uuid(),
-    project_id uuid not null references projects(id) on delete cascade,
-    role text not null,
-    content text not null,
-    created_at timestamp default now()
-  );
-*/
-
 import { supabaseAdmin } from '@/src/lib/supabaseAdmin'
+import { buildStrategyPromptBlock, buildInsightsPromptBlock, buildMusicContextPromptBlock, isMusicMode, type StructuredStrategy, type AiInsights } from '@/src/lib/strategy'
+
+const STRATEGY_FIELDS = ['goal', 'audience', 'tone', 'content_style', 'platform_focus', 'cta', 'song_meaning', 'differentiator', 'assets_preference']
+
+const RECOMMENDATION_KEYWORDS = [
+  'recommend', 'improve', 'suggest', 'change', 'update', 'fix',
+  'better', 'optimize', 'refine', 'adjust', 'enhance', 'review',
+]
+
+function looksLikeRecommendationRequest(message: string): boolean {
+  const lower = message.toLowerCase()
+  return RECOMMENDATION_KEYWORDS.some((kw) => lower.includes(kw))
+}
 
 export async function POST(request: Request) {
   const body = await request.json()
@@ -36,27 +37,88 @@ export async function POST(request: Request) {
     )
   }
 
-  // Load recent messages for context
-  const { data: recentMessages } = await supabaseAdmin
-    .from('project_messages')
-    .select('role, content')
-    .eq('project_id', projectId)
-    .order('created_at', { ascending: true })
-    .limit(50)
+  // Load project context
+  const [{ data: proj }, { data: interview }, { data: recentMessages }] = await Promise.all([
+    supabaseAdmin
+      .from('projects')
+      .select('name, mode, description, lyrics_text, song_style')
+      .eq('id', projectId)
+      .single(),
+    supabaseAdmin
+      .from('project_interviews')
+      .select('raw_strategy_text, structured_strategy, ai_insights, context_summary')
+      .eq('project_id', projectId)
+      .limit(1)
+      .single(),
+    supabaseAdmin
+      .from('project_messages')
+      .select('role, content')
+      .eq('project_id', projectId)
+      .order('created_at', { ascending: true })
+      .limit(50),
+  ])
+
+  // Build context blocks
+  const rawStrategy = interview?.raw_strategy_text || interview?.context_summary || null
+  const structured = (interview?.structured_strategy as StructuredStrategy) || null
+  const insights = (interview?.ai_insights as AiInsights) || null
+  const strategyBlock = buildStrategyPromptBlock(rawStrategy, structured)
+  const insightsBlock = buildInsightsPromptBlock(insights)
+
+  let musicBlock = ''
+  if (isMusicMode(proj?.mode)) {
+    musicBlock = buildMusicContextPromptBlock(proj?.lyrics_text || null, proj?.song_style || null)
+  }
+
+  const contextSections = [
+    `Project: ${proj?.name || 'Unknown'} (${proj?.mode || 'General'})`,
+    proj?.description ? `Description: ${proj.description}` : '',
+    strategyBlock,
+    insightsBlock,
+    musicBlock,
+  ].filter(Boolean).join('\n\n')
+
+  const wantsRecommendations = looksLikeRecommendationRequest(message)
+
+  const recommendationInstructions = wantsRecommendations ? `
+
+When giving strategy recommendations, you MUST return a JSON object with this exact structure:
+{
+  "text": "Your introduction or summary text here (plain text, no markdown)",
+  "recommendations": [
+    {
+      "title": "Short title for this recommendation",
+      "recommendation": "1-2 sentence explanation of what to change and why",
+      "targetField": "one of: ${STRATEGY_FIELDS.join(', ')}",
+      "suggestedValue": "The exact new value to use for that field"
+    }
+  ]
+}
+
+Rules for recommendations:
+- Each recommendation must map to exactly one targetField
+- suggestedValue should be a clean, concise value (not a paragraph)
+- Include 2-5 recommendations
+- Only recommend changes that would meaningfully improve the strategy
+- Return ONLY the JSON object, nothing else` : ''
+
+  const systemPrompt = `You are ViralPilot, an AI content strategist. You help users create social media content plans, hooks, scripts, and promotion strategies.
+
+You have full context about this project's strategy, AI insights, and creative inputs. Use them to give specific, actionable advice — not generic suggestions.
+
+Do not use markdown formatting. No **, ##, ###. Write in plain text with clean line breaks.
+${recommendationInstructions}
+
+${contextSections}`
 
   const openaiMessages = [
-    {
-      role: 'system' as const,
-      content:
-        'You are ViralPilot, an AI content strategist helping users create social media content plans, clips, and promotion strategies for their project.',
-    },
+    { role: 'system' as const, content: systemPrompt },
     ...(recentMessages || []).map((m) => ({
       role: m.role as 'user' | 'assistant',
       content: m.content,
     })),
   ]
 
-  // Call OpenAI
   const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -79,12 +141,36 @@ export async function POST(request: Request) {
   }
 
   const openaiData = await openaiRes.json()
-  const reply = openaiData.choices?.[0]?.message?.content || 'No response.'
+  const rawReply = openaiData.choices?.[0]?.message?.content || 'No response.'
 
-  // Save assistant reply
+  // Try to parse structured recommendations
+  let reply = rawReply
+  let recommendations = null
+
+  if (wantsRecommendations) {
+    try {
+      const cleaned = rawReply.replace(/```json\n?|```\n?/g, '').trim()
+      const parsed = JSON.parse(cleaned)
+      if (parsed.text && Array.isArray(parsed.recommendations)) {
+        reply = parsed.text
+        recommendations = parsed.recommendations.filter(
+          (r: { targetField?: string }) => r.targetField && STRATEGY_FIELDS.includes(r.targetField)
+        )
+        if (recommendations.length === 0) recommendations = null
+      }
+    } catch {
+      // Not valid JSON — use raw reply as plain text
+    }
+  }
+
+  // Save assistant reply — embed recommendations as a JSON tag if present
+  const savedContent = recommendations
+    ? `${reply}\n<!--RECS:${JSON.stringify(recommendations)}-->`
+    : reply
+
   await supabaseAdmin
     .from('project_messages')
-    .insert({ project_id: projectId, role: 'assistant', content: reply })
+    .insert({ project_id: projectId, role: 'assistant', content: savedContent })
 
-  return Response.json({ success: true, reply })
+  return Response.json({ success: true, reply, recommendations })
 }

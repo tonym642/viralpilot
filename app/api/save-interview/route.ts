@@ -1,33 +1,6 @@
 /*
-  Required Supabase table — run this SQL in the Supabase SQL Editor:
-
-  create table project_interviews (
-    id uuid primary key default gen_random_uuid(),
-    project_id uuid not null references projects(id) on delete cascade,
-    goal text,
-    audience text,
-    tone text,
-    content_style text,
-    platform_focus text,
-    cta text,
-    song_meaning text,
-    differentiator text,
-    assets_preference text,
-    context_summary text,
-    raw_strategy_text text,
-    structured_strategy jsonb,
-    interview_completed boolean default true,
-    created_at timestamp default now(),
-    updated_at timestamp default now()
-  );
-
-  -- Add unique constraint so one interview per project
-  alter table project_interviews add constraint project_interviews_project_unique unique (project_id);
-
-  -- If table already exists, run these ALTER statements instead:
-  -- alter table project_interviews add column if not exists raw_strategy_text text;
-  -- alter table project_interviews add column if not exists structured_strategy jsonb;
-  -- alter table project_interviews add column if not exists updated_at timestamp default now();
+  Required columns on project_interviews:
+  -- alter table project_interviews add column if not exists ai_insights jsonb;
 */
 
 import { NextResponse } from 'next/server'
@@ -60,28 +33,30 @@ export async function POST(request: Request) {
   const rawStrategyText = buildRawStrategyText(answers)
   const structuredStrategy = buildStructuredStrategy(answers)
 
+  // Reset strategy status when strategy changes — requires re-audit
+  const upsertData: Record<string, unknown> = {
+    project_id: projectId,
+    goal: answers.goal,
+    audience: answers.audience,
+    tone: answers.tone,
+    content_style: answers.content_style,
+    platform_focus: answers.platform_focus,
+    cta: answers.cta,
+    song_meaning: answers.song_meaning,
+    differentiator: answers.differentiator,
+    assets_preference: answers.assets_preference || null,
+    context_summary: summary,
+    raw_strategy_text: rawStrategyText,
+    structured_strategy: structuredStrategy,
+    interview_completed: true,
+    strategy_status: null,
+    ai_insights: null,
+    updated_at: new Date().toISOString(),
+  }
+
   const { data, error } = await supabaseAdmin
     .from('project_interviews')
-    .upsert(
-      {
-        project_id: projectId,
-        goal: answers.goal,
-        audience: answers.audience,
-        tone: answers.tone,
-        content_style: answers.content_style,
-        platform_focus: answers.platform_focus,
-        cta: answers.cta,
-        song_meaning: answers.song_meaning,
-        differentiator: answers.differentiator,
-        assets_preference: answers.assets_preference || null,
-        context_summary: summary,
-        raw_strategy_text: rawStrategyText,
-        structured_strategy: structuredStrategy,
-        interview_completed: true,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'project_id' }
-    )
+    .upsert(upsertData, { onConflict: 'project_id' })
     .select()
     .single()
 
@@ -91,6 +66,18 @@ export async function POST(request: Request) {
       { success: false, error: error.message },
       { status: 500 }
     )
+  }
+
+  // Save song_style and lyrics_text to the projects table if provided
+  const projectUpdate: Record<string, unknown> = {}
+  if (answers.song_style) projectUpdate.song_style = answers.song_style
+  if (answers.lyrics_text) projectUpdate.lyrics_text = answers.lyrics_text
+
+  if (Object.keys(projectUpdate).length > 0) {
+    await supabaseAdmin
+      .from('projects')
+      .update(projectUpdate)
+      .eq('id', projectId)
   }
 
   return NextResponse.json({ success: true, interview: data })

@@ -9,6 +9,16 @@ type Message = {
   created_at: string
 }
 
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/<!--RECS:[\s\S]*?-->/g, '')
+    .replace(/#{1,6}\s?/g, '')
+    .replace(/\*\*/g, '')
+    .replace(/\*/g, '')
+    .replace(/__/g, '')
+    .trim()
+}
+
 export default function ProjectChat({
   projectId,
   initialMessages,
@@ -104,7 +114,7 @@ export default function ProjectChat({
                   : 'chat-bubble-assistant'
               }
             >
-              {msg.content}
+              {stripMarkdown(msg.content)}
             </div>
           </div>
         ))}

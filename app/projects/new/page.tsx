@@ -19,24 +19,24 @@ export default function NewProjectPage() {
 
     setLoading(true)
 
-    const { error } = await supabase.from('projects').insert([
+    const { data, error } = await supabase.from('projects').insert([
       {
         name,
         mode,
         type: mode,
         description,
       },
-    ])
+    ]).select().single()
 
     setLoading(false)
 
-    if (error) {
+    if (error || !data) {
       alert('Error creating project')
       console.error(error)
       return
     }
 
-    router.push('/projects')
+    router.push(`/projects/${data.id}`)
   }
 
   return (

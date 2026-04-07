@@ -13,7 +13,7 @@
 */
 
 import { supabaseAdmin } from '@/src/lib/supabaseAdmin'
-import { buildStrategyPromptBlock, buildMusicContextPromptBlock, isMusicMode, type StructuredStrategy } from '@/src/lib/strategy'
+import { buildStrategyPromptBlock, buildMusicContextPromptBlock, buildInsightsPromptBlock, isMusicMode, type StructuredStrategy, type AiInsights } from '@/src/lib/strategy'
 
 export async function POST(request: Request) {
   const body = await request.json()
@@ -35,17 +35,19 @@ export async function POST(request: Request) {
 
   const projectMode = proj?.mode || null
 
-  // Fetch strategy data for this project
+  // Fetch strategy data and AI insights for this project
   const { data: interview } = await supabaseAdmin
     .from('project_interviews')
-    .select('raw_strategy_text, structured_strategy, context_summary')
+    .select('raw_strategy_text, structured_strategy, context_summary, ai_insights')
     .eq('project_id', projectId)
     .limit(1)
     .single()
 
   const rawStrategy = interview?.raw_strategy_text || interview?.context_summary || null
   const structured = (interview?.structured_strategy as StructuredStrategy) || null
+  const insights = (interview?.ai_insights as AiInsights) || null
   const strategyBlock = buildStrategyPromptBlock(rawStrategy, structured)
+  const insightsBlock = buildInsightsPromptBlock(insights)
 
   // Include lyrics for Music mode projects
   let musicBlock = ''
@@ -55,7 +57,7 @@ export async function POST(request: Request) {
 
   const systemPrompt = `You are ViralPilot, an expert in viral content strategy. Generate a 30-day content plan.
 
-${strategyBlock ? `The user has a saved strategy for this project. You MUST align every day of the plan with this strategy — matching the tone, audience, platforms, goals, CTA style, and content pillars described below.\n\n${strategyBlock}\n\n` : ''}${musicBlock ? `${musicBlock}\n\n` : ''}Return ONLY JSON in this format:
+${strategyBlock ? `The user has a saved strategy for this project. You MUST align every day of the plan with this strategy — matching the tone, audience, platforms, goals, CTA style, and content pillars described below.\n\n${strategyBlock}\n\n` : ''}${insightsBlock ? `${insightsBlock}\n\n` : ''}${musicBlock ? `${musicBlock}\n\n` : ''}Return ONLY JSON in this format:
 [
   {
     "day": 1,

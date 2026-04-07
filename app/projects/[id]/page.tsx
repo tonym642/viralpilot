@@ -59,6 +59,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
         interviewData={interview}
         strategyUpdatedAt={interview?.updated_at || interview?.created_at || null}
         planGeneratedAt={planGeneratedAt}
+        strategyStatus={interview?.strategy_status || null}
       />
     </main>
   )

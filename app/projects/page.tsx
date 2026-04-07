@@ -2,16 +2,31 @@ import Link from 'next/link'
 import { supabase } from '@/src/lib/supabaseClient'
 import ProjectAvatar from '@/src/components/ProjectAvatar'
 import EqualizerIndicator from '@/src/components/EqualizerIndicator'
+import ArchiveButton from '@/src/components/ArchiveButton'
+import HelpButton from '@/src/components/HelpModal'
+import { helpContent } from '@/src/lib/helpContent'
 
-export default async function ProjectsPage() {
-  const { data: projects, error } = await supabase
+export default async function ProjectsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ show?: string }>
+}) {
+  const params = await searchParams
+  const showArchived = params.show === 'archived'
+
+  const { data: allProjects, error } = await supabase
     .from('projects')
     .select('*')
     .order('created_at', { ascending: false })
 
+  // Split active and archived
+  const activeProjects = allProjects?.filter((p) => !p.archived) || []
+  const archivedProjects = allProjects?.filter((p) => p.archived) || []
+  const projects = showArchived ? archivedProjects : activeProjects
+
   // Fetch content counts per project
   const contentCounts: Record<string, number> = {}
-  if (projects && projects.length > 0) {
+  if (allProjects && allProjects.length > 0) {
     const { data: counts } = await supabase
       .from('content_items')
       .select('project_id')
@@ -22,11 +37,19 @@ export default async function ProjectsPage() {
     }
   }
 
-  const active = projects?.[0] ?? null
+  const active = activeProjects[0] ?? null
 
   return (
     <main className="vp-content">
-      <h1 className="vp-greeting">Welcome back</h1>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+        <h1 className="vp-greeting">Welcome back</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Link href="/projects/new" className="btn-primary" style={{ fontSize: '12px', height: '30px', padding: '0 14px' }}>
+            + New Project
+          </Link>
+          <HelpButton pageKey="dashboard" content={helpContent.dashboard} />
+        </div>
+      </div>
       <p className="vp-subtext">Here&apos;s what&apos;s happening with your content strategy.</p>
 
       {error && <p style={{ color: '#ff6b6b', marginBottom: '12px', fontSize: '13px' }}>Error loading projects.</p>}
@@ -43,10 +66,10 @@ export default async function ProjectsPage() {
                 <div className="vp-project-row">
                   <ProjectAvatar name={active.name} mode={active.mode} size={32} />
                   <div className="vp-project-info">
-                    <p className="vp-project-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div className="vp-project-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       {active.name}
                       {active.mode === 'Music' && contentCounts[active.id] > 0 && <EqualizerIndicator size={12} />}
-                    </p>
+                    </div>
                     <p className="vp-project-sub">{active.mode || active.type || 'No mode'}</p>
                   </div>
                 </div>
@@ -115,10 +138,21 @@ export default async function ProjectsPage() {
       </div>
 
       {/* ── All Projects ── */}
-      {projects && projects.length > 0 && (
+      {projects.length > 0 && (
         <div className="vp-card" style={{ marginBottom: '18px' }}>
           <div className="vp-card-header">
-            <h3>All Projects</h3>
+            <h3>{showArchived ? 'Archived Projects' : 'All Projects'}</h3>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {showArchived ? (
+                <Link href="/projects" style={{ fontSize: '11px', color: 'rgba(255,255,255,0.42)', textDecoration: 'none' }}>
+                  ← Back to Active
+                </Link>
+              ) : archivedProjects.length > 0 ? (
+                <Link href="/projects?show=archived" style={{ fontSize: '11px', color: 'rgba(255,255,255,0.42)', textDecoration: 'none' }}>
+                  Archived ({archivedProjects.length})
+                </Link>
+              ) : null}
+            </div>
           </div>
           <div className="vp-card-body" style={{ padding: 0 }}>
             {/* Table header */}
@@ -129,6 +163,7 @@ export default async function ProjectsPage() {
               <span className="vp-table-col vp-col-date">Created</span>
               <span className="vp-table-col vp-col-type">Mode</span>
               <span className="vp-table-col vp-col-status">Status</span>
+              <span className="vp-table-col" style={{ flex: '0 0 32px' }}>{showArchived ? '' : 'Archive'}</span>
             </div>
             {/* Rows */}
             {projects.map((project) => {
@@ -139,11 +174,12 @@ export default async function ProjectsPage() {
                   key={project.id}
                   href={`/projects/${project.id}`}
                   className="vp-table-row"
+                  style={showArchived ? { opacity: 0.6 } : undefined}
                 >
                   <span className="vp-table-col vp-col-name">
                     <ProjectAvatar name={project.name} mode={project.mode} size={28} />
                     <span className="vp-table-name-text">{project.name}</span>
-                    {project.mode === 'Music' && count > 0 && <EqualizerIndicator size={12} />}
+                    {project.mode === 'Music' && count > 0 && !showArchived && <EqualizerIndicator size={12} />}
                   </span>
                   <span className="vp-table-col vp-col-desc vp-table-desc-text">
                     {project.description || '—'}
@@ -159,6 +195,9 @@ export default async function ProjectsPage() {
                     <span className={`vp-status-dot ${count > 0 ? 'active' : 'draft'}`} />
                     {count > 0 ? 'Active' : 'Draft'}
                   </span>
+                  <span className="vp-table-col" style={{ flex: '0 0 32px', justifyContent: 'center' }}>
+                    <ArchiveButton projectId={project.id} archived={!!project.archived} />
+                  </span>
                 </Link>
               )
             })}
@@ -166,17 +205,15 @@ export default async function ProjectsPage() {
         </div>
       )}
 
-      {/* ── Footer actions ── */}
-      <div className="vp-footer-actions">
-        <Link href="/projects/new" className="vp-btn-primary">
-          + New Project
-        </Link>
-        {active && (
-          <Link href={`/projects/${active.id}`} className="vp-btn">
-            Open Chat
-          </Link>
-        )}
-      </div>
+      {/* Show empty archived state */}
+      {showArchived && projects.length === 0 && (
+        <div className="vp-card" style={{ marginBottom: '18px' }}>
+          <div className="vp-card-body" style={{ textAlign: 'center', padding: '30px' }}>
+            <p className="muted" style={{ margin: '0 0 8px 0', fontSize: '13px' }}>No archived projects</p>
+            <Link href="/projects" style={{ fontSize: '12px' }}>← Back to Active</Link>
+          </div>
+        </div>
+      )}
     </main>
   )
 }

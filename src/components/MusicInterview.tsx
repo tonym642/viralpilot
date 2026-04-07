@@ -75,6 +75,18 @@ const questions: Question[] = [
     required: false,
     skipLabel: 'Skip',
   },
+  {
+    key: 'song_style',
+    title: 'Describe the style of your song',
+    type: 'text',
+    required: true,
+  },
+  {
+    key: 'lyrics_text',
+    title: 'Paste your song lyrics',
+    type: 'text',
+    required: true,
+  },
 ]
 
 export default function MusicInterview({
@@ -220,51 +232,78 @@ export default function MusicInterview({
 
   // Summary screen
   if (isSummary) {
+    const strategyQuestions = questions.filter((q) => q.key !== 'song_style' && q.key !== 'lyrics_text')
+
     return (
-      <div style={{ flex: 1, overflowY: 'auto', scrollbarWidth: 'none', padding: '4px 0' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-          <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>Here&apos;s what I understand</h2>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, padding: '4px 0' }}>
+        {/* Top bar: title + buttons */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexShrink: 0 }}>
+          <h2 style={{ margin: 0, fontSize: '14px', fontWeight: 700 }}>Review your strategy</h2>
           <div style={{ display: 'flex', gap: '6px' }}>
-            <button
-              className="vp-btn"
-              style={{ fontSize: '11px', height: '28px', padding: '0 10px' }}
-              onClick={() => setStep(0)}
-            >
-              Edit
-            </button>
-            <button
-              className="btn-primary"
-              style={{ fontSize: '11px', height: '28px', padding: '0 10px' }}
-              onClick={handleConfirm}
-              disabled={saving}
-            >
-              {saving ? 'Saving...' : 'Confirm'}
+            <button className="vp-btn" style={{ fontSize: '11px', height: '28px', padding: '0 10px' }} onClick={() => setStep(0)}>Edit Answers</button>
+            <button className="btn-primary" style={{ fontSize: '11px', height: '28px', padding: '0 10px' }} onClick={handleConfirm} disabled={saving}>
+              {saving ? 'Saving...' : 'Confirm & Save'}
             </button>
           </div>
         </div>
 
-        <div>
-          {questions.map((q) => {
-            const val = answers[q.key]
-            if (!val) return null
-            return (
-              <div key={q.key} style={{ marginBottom: '12px' }}>
-                <h4 style={{
-                  margin: '0 0 3px 0',
-                  fontSize: '9px',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.08em',
-                  color: 'rgba(255,255,255,0.25)',
-                }}>
-                  {q.title}
-                </h4>
-                <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255,255,255,0.7)' }}>
-                  {val}
-                </p>
-              </div>
-            )
-          })}
+        <div style={{ display: 'flex', gap: '16px', flex: 1, minHeight: 0 }}>
+          {/* Left: Strategy fields in a card */}
+          <div style={{
+            flex: '0 0 40%',
+            background: 'rgba(13,19,30,0.8)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: '10px',
+            padding: '14px',
+            overflowY: 'auto',
+          }}>
+            <h3 style={{ margin: '0 0 12px 0', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(255,255,255,0.38)' }}>
+              Strategy Inputs
+            </h3>
+            {strategyQuestions.map((q) => {
+              const val = answers[q.key]
+              if (!val) return null
+              return (
+                <div key={q.key} style={{ marginBottom: '10px' }}>
+                  <h4 style={{ margin: '0 0 2px 0', fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.32)' }}>
+                    {q.title}
+                  </h4>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#c8d1de', lineHeight: '1.5' }}>{val}</p>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Right: Song Style + Lyrics (editable) */}
+          <div style={{ flex: '1 1 60%', display: 'flex', flexDirection: 'column', gap: '12px', minHeight: 0 }}>
+            {/* Song Style */}
+            <div style={{ flexShrink: 0 }}>
+              <h4 style={{ margin: '0 0 6px 0', fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.32)' }}>
+                Song Style
+              </h4>
+              <textarea
+                className="input"
+                value={answers.song_style || ''}
+                onChange={(e) => setAnswers((prev) => ({ ...prev, song_style: e.target.value }))}
+                placeholder="Dembow, melodic reggaeton, high-energy party track..."
+                style={{ minHeight: '50px', resize: 'vertical', fontSize: '12px' }}
+              />
+            </div>
+
+            {/* Lyrics */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+              <h4 style={{ margin: '0 0 6px 0', fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.32)' }}>
+                Lyrics
+              </h4>
+              <textarea
+                className="input"
+                value={answers.lyrics_text || ''}
+                onChange={(e) => setAnswers((prev) => ({ ...prev, lyrics_text: e.target.value }))}
+                placeholder="Paste your full song lyrics here..."
+                style={{ flex: 1, resize: 'none', fontSize: '12px', lineHeight: '1.7' }}
+              />
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -277,26 +316,6 @@ export default function MusicInterview({
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, padding: '4px 0' }}>
       {/* Progress */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', flexShrink: 0 }}>
-        {step > 0 && (
-          <button
-            onClick={() => setStep((s) => s - 1)}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '12px',
-              fontFamily: 'inherit',
-              color: 'rgba(255,255,255,0.3)',
-              padding: '2px 6px',
-              borderRadius: '4px',
-              transition: 'color 0.15s',
-            }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)' }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)' }}
-          >
-            ← Back
-          </button>
-        )}
         <span className="muted" style={{ fontSize: '11px' }}>
           {step + 1} of {totalQuestions}
         </span>
@@ -368,27 +387,52 @@ export default function MusicInterview({
               {current.skipLabel}
             </button>
           )}
+          {step > 0 && (
+            <button
+              className="vp-btn"
+              onClick={() => setStep((s) => s - 1)}
+              style={{ fontSize: '12px', height: '32px', padding: '0 14px', marginTop: '8px' }}
+            >
+              ← Back
+            </button>
+          )}
         </div>
       )}
 
       {/* Text input */}
       {current.type === 'text' && (
-        <div>
+        <div style={{ display: 'flex', flexDirection: 'column', flex: current.key === 'lyrics_text' ? 1 : undefined, minHeight: 0 }}>
           <textarea
             className="input"
-            placeholder="Type your answer..."
+            placeholder={current.key === 'lyrics_text' ? 'Paste your full song lyrics here...' : 'Type your answer...'}
             value={answers[current.key] || ''}
             onChange={(e) => setAnswers((prev) => ({ ...prev, [current.key]: e.target.value }))}
-            style={{ minHeight: '80px', resize: 'vertical', marginBottom: '12px' }}
+            style={{
+              minHeight: current.key === 'lyrics_text' ? '200px' : '80px',
+              flex: current.key === 'lyrics_text' ? 1 : undefined,
+              resize: current.key === 'lyrics_text' ? 'none' : 'vertical',
+              marginBottom: '12px',
+            }}
           />
-          <button
-            className="btn-primary"
-            onClick={() => setStep((s) => s + 1)}
-            disabled={!canContinue()}
-            style={{ fontSize: '12px', height: '32px', padding: '0 14px' }}
-          >
-            Continue
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {step > 0 && (
+              <button
+                className="vp-btn"
+                onClick={() => setStep((s) => s - 1)}
+                style={{ fontSize: '12px', height: '32px', padding: '0 14px' }}
+              >
+                ← Back
+              </button>
+            )}
+            <button
+              className="btn-primary"
+              onClick={() => setStep((s) => s + 1)}
+              disabled={!canContinue()}
+              style={{ fontSize: '12px', height: '32px', padding: '0 14px' }}
+            >
+              Continue
+            </button>
+          </div>
         </div>
       )}
     </div>
