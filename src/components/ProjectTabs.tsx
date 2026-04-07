@@ -4,6 +4,8 @@ import { useState } from 'react'
 import ProjectChat from './ProjectChat'
 import GeneratePlanButton from './GeneratePlanButton'
 import ContentLibrary from './ContentLibrary'
+import MusicInterview from './MusicInterview'
+import StrategyPanel from './StrategyPanel'
 
 type Plan = {
   id: string
@@ -31,6 +33,7 @@ const tabs = [
   { key: 'plan', label: 'Content Plan' },
   { key: 'library', label: 'Library' },
   { key: 'assets', label: 'Assets' },
+  { key: 'strategy', label: 'Strategy' },
   { key: 'chat', label: 'AI Chat' },
 ] as const
 
@@ -58,12 +61,17 @@ export default function ProjectTabs({
   plans,
   messages,
   contentItems,
+  interviewCompleted: initialInterviewCompleted = false,
+  interviewData = null,
 }: {
   project: Project
   plans: Plan[]
   messages: Message[]
   contentItems: ContentItem[]
+  interviewCompleted?: boolean
+  interviewData?: Record<string, unknown> | null
 }) {
+  const [interviewDone, setInterviewDone] = useState(initialInterviewCompleted)
   const [active, setActive] = useState<TabKey>('plan')
   const [platformFilter, setPlatformFilter] = useState<string>('All')
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(
@@ -239,7 +247,17 @@ export default function ProjectTabs({
           </div>
         )}
 
-        {active === 'plan' && (
+        {active === 'plan' && !interviewDone && (
+          <MusicInterview
+            projectId={project.id}
+            projectName={project.name}
+            projectType={project.type || ''}
+            projectDescription={project.description || ''}
+            onComplete={() => setInterviewDone(true)}
+          />
+        )}
+
+        {active === 'plan' && interviewDone && (
           <div style={{ display: 'flex', gap: '20px', flex: 1, minHeight: 0 }}>
             {/* Left: plan list */}
             <div style={{ width: '40%', flexShrink: 0, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
@@ -543,6 +561,14 @@ export default function ProjectTabs({
               )}
             </div>
           </div>
+        )}
+
+        {active === 'strategy' && (
+          <StrategyPanel
+            project={project}
+            interview={interviewData as Record<string, string | boolean | null> | null}
+            onSwitchToPlan={() => setActive('plan')}
+          />
         )}
 
         {active === 'chat' && (

@@ -10,7 +10,7 @@ type ProjectPageProps = {
 export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   const { id } = await params
 
-  const [{ data: project, error }, { data: messages }, { data: plans }, { data: contentItems }] = await Promise.all([
+  const [{ data: project, error }, { data: messages }, { data: plans }, { data: contentItems }, { data: interviewRows }] = await Promise.all([
     supabase.from('projects').select('*').eq('id', id).single(),
     supabase
       .from('project_messages')
@@ -27,7 +27,14 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
       .select('*')
       .eq('project_id', id)
       .order('day', { ascending: true }),
+    supabase
+      .from('project_interviews')
+      .select('*')
+      .eq('project_id', id)
+      .limit(1),
   ])
+
+  const interview = interviewRows?.[0] ?? null
 
   if (error || !project) {
     return (
@@ -47,6 +54,8 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
         plans={plans || []}
         messages={messages || []}
         contentItems={contentItems || []}
+        interviewCompleted={!!interview?.interview_completed}
+        interviewData={interview}
       />
     </main>
   )
