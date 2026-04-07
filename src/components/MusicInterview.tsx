@@ -80,7 +80,7 @@ const questions: Question[] = [
 export default function MusicInterview({
   projectId,
   projectName,
-  projectType,
+  projectMode,
   projectDescription,
   onComplete,
   initialAnswers,
@@ -88,7 +88,7 @@ export default function MusicInterview({
 }: {
   projectId: string
   projectName: string
-  projectType: string
+  projectMode: string
   projectDescription: string
   onComplete: () => void
   initialAnswers?: Record<string, string>
@@ -146,7 +146,7 @@ export default function MusicInterview({
             body: JSON.stringify({
               projectId,
               projectName,
-              projectType,
+              projectMode,
               description: projectDescription,
             }),
           })

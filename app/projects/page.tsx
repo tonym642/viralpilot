@@ -1,11 +1,26 @@
 import Link from 'next/link'
 import { supabase } from '@/src/lib/supabaseClient'
+import ProjectAvatar from '@/src/components/ProjectAvatar'
+import EqualizerIndicator from '@/src/components/EqualizerIndicator'
 
 export default async function ProjectsPage() {
   const { data: projects, error } = await supabase
     .from('projects')
     .select('*')
     .order('created_at', { ascending: false })
+
+  // Fetch content counts per project
+  const contentCounts: Record<string, number> = {}
+  if (projects && projects.length > 0) {
+    const { data: counts } = await supabase
+      .from('content_items')
+      .select('project_id')
+    if (counts) {
+      for (const row of counts) {
+        contentCounts[row.project_id] = (contentCounts[row.project_id] || 0) + 1
+      }
+    }
+  }
 
   const active = projects?.[0] ?? null
 
@@ -26,12 +41,13 @@ export default async function ProjectsPage() {
             {active ? (
               <>
                 <div className="vp-project-row">
-                  <div className="vp-project-icon">
-                    {active.name.charAt(0).toUpperCase()}
-                  </div>
+                  <ProjectAvatar name={active.name} mode={active.mode} size={32} />
                   <div className="vp-project-info">
-                    <p className="vp-project-title">{active.name}</p>
-                    <p className="vp-project-sub">{active.type || 'No type'}</p>
+                    <p className="vp-project-title" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {active.name}
+                      {active.mode === 'Music' && contentCounts[active.id] > 0 && <EqualizerIndicator size={12} />}
+                    </p>
+                    <p className="vp-project-sub">{active.mode || active.type || 'No mode'}</p>
                   </div>
                 </div>
                 <div style={{ marginTop: '14px' }}>
@@ -104,26 +120,48 @@ export default async function ProjectsPage() {
           <div className="vp-card-header">
             <h3>All Projects</h3>
           </div>
-          <div className="vp-card-body" style={{ display: 'grid', gap: '6px' }}>
-            {projects.map((project) => (
-              <Link
-                key={project.id}
-                href={`/projects/${project.id}`}
-                style={{ textDecoration: 'none', color: 'inherit' }}
-              >
-                <div className="vp-plan-item" style={{ cursor: 'pointer' }}>
-                  <div className="vp-project-icon" style={{ width: '28px', height: '28px', borderRadius: '7px', fontSize: '12px' }}>
-                    {project.name.charAt(0).toUpperCase()}
-                  </div>
-                  <span className="vp-plan-desc" style={{ fontWeight: 500, color: '#f0f4fa' }}>
-                    {project.name}
+          <div className="vp-card-body" style={{ padding: 0 }}>
+            {/* Table header */}
+            <div className="vp-table-header">
+              <span className="vp-table-col vp-col-name">Name</span>
+              <span className="vp-table-col vp-col-desc">Description</span>
+              <span className="vp-table-col vp-col-items">Content</span>
+              <span className="vp-table-col vp-col-date">Created</span>
+              <span className="vp-table-col vp-col-type">Mode</span>
+              <span className="vp-table-col vp-col-status">Status</span>
+            </div>
+            {/* Rows */}
+            {projects.map((project) => {
+              const count = contentCounts[project.id] ?? 0
+              const created = new Date(project.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+              return (
+                <Link
+                  key={project.id}
+                  href={`/projects/${project.id}`}
+                  className="vp-table-row"
+                >
+                  <span className="vp-table-col vp-col-name">
+                    <ProjectAvatar name={project.name} mode={project.mode} size={28} />
+                    <span className="vp-table-name-text">{project.name}</span>
+                    {project.mode === 'Music' && count > 0 && <EqualizerIndicator size={12} />}
                   </span>
-                  <span className="vp-plan-platform">
-                    {project.type || 'N/A'}
+                  <span className="vp-table-col vp-col-desc vp-table-desc-text">
+                    {project.description || '—'}
                   </span>
-                </div>
-              </Link>
-            ))}
+                  <span className="vp-table-col vp-col-items">
+                    <span className="vp-count-badge">{count}</span>
+                  </span>
+                  <span className="vp-table-col vp-col-date">{created}</span>
+                  <span className="vp-table-col vp-col-type">
+                    <span className="vp-plan-platform">{project.mode || project.type || 'N/A'}</span>
+                  </span>
+                  <span className="vp-table-col vp-col-status">
+                    <span className={`vp-status-dot ${count > 0 ? 'active' : 'draft'}`} />
+                    {count > 0 ? 'Active' : 'Draft'}
+                  </span>
+                </Link>
+              )
+            })}
           </div>
         </div>
       )}

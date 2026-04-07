@@ -35,6 +35,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   ])
 
   const interview = interviewRows?.[0] ?? null
+  const planGeneratedAt = plans && plans.length > 0 ? plans[0].created_at : null
 
   if (error || !project) {
     return (
@@ -56,6 +57,8 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
         contentItems={contentItems || []}
         interviewCompleted={!!interview?.interview_completed}
         interviewData={interview}
+        strategyUpdatedAt={interview?.updated_at || interview?.created_at || null}
+        planGeneratedAt={planGeneratedAt}
       />
     </main>
   )

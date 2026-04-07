@@ -3,7 +3,7 @@ import { supabaseAdmin } from '@/src/lib/supabaseAdmin'
 
 export async function POST(request: Request) {
   const body = await request.json()
-  const { id, name, type, description } = body
+  const { id, name, mode, type, description, lyrics_text, song_style } = body
 
   if (!id || !name) {
     return NextResponse.json(
@@ -12,9 +12,20 @@ export async function POST(request: Request) {
     )
   }
 
+  const update: Record<string, unknown> = { name, type, description }
+  if (mode !== undefined) {
+    update.mode = mode
+  }
+  if (lyrics_text !== undefined) {
+    update.lyrics_text = lyrics_text
+  }
+  if (song_style !== undefined) {
+    update.song_style = song_style
+  }
+
   const { error } = await supabaseAdmin
     .from('projects')
-    .update({ name, type, description })
+    .update(update)
     .eq('id', id)
 
   if (error) {

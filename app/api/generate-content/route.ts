@@ -19,6 +19,7 @@
 
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/src/lib/supabaseAdmin'
+import { buildStrategyPromptBlock, buildMusicContextPromptBlock, isMusicMode, type StructuredStrategy } from '@/src/lib/strategy'
 
 function parseSection(raw: string, key: string, nextKey: string | null): string {
   const start = raw.indexOf(key + ':')
@@ -30,7 +31,7 @@ function parseSection(raw: string, key: string, nextKey: string | null): string 
 
 export async function POST(request: Request) {
   const body = await request.json()
-  const { projectId, projectName, projectType, description, day, title, platform } = body
+  const { projectId, projectName, description, day, title, platform } = body
 
   if (!title || !day || !projectId) {
     return NextResponse.json(
@@ -38,6 +39,52 @@ export async function POST(request: Request) {
       { status: 400 }
     )
   }
+
+  // Fetch project mode and lyrics from the project record
+  const { data: proj } = await supabaseAdmin
+    .from('projects')
+    .select('mode, lyrics_text, song_style')
+    .eq('id', projectId)
+    .single()
+
+  const projectMode = proj?.mode || null
+
+  // Fetch strategy data for this project
+  const { data: interview } = await supabaseAdmin
+    .from('project_interviews')
+    .select('raw_strategy_text, structured_strategy, context_summary')
+    .eq('project_id', projectId)
+    .limit(1)
+    .single()
+
+  const rawStrategy = interview?.raw_strategy_text || interview?.context_summary || null
+  const structured = (interview?.structured_strategy as StructuredStrategy) || null
+  const strategyBlock = buildStrategyPromptBlock(rawStrategy, structured)
+
+  // Include lyrics for Music mode projects
+  let musicBlock = ''
+  if (isMusicMode(projectMode)) {
+    musicBlock = buildMusicContextPromptBlock(proj?.lyrics_text || null, proj?.song_style || null)
+  }
+
+  const systemPrompt = `You are ViralPilot, an expert content strategist.
+
+${strategyBlock ? `Use the following project strategy to guide your content. Match the tone, audience, CTA style, and brand angle.\n\n${strategyBlock}\n\n` : ''}${musicBlock ? `${musicBlock}\n\n` : ''}Generate content for this plan item. Return ONLY the structured output below with no extra commentary:
+
+HOOK:
+(a short attention-grabbing opening line that matches the strategy's tone)
+
+SCRIPT:
+(a short script or scene direction, 2-4 sentences, aligned with strategy goals)
+
+CAPTION:
+(a social media caption, 1-2 sentences, targeting the strategy's audience)
+
+HASHTAGS:
+(5-8 relevant hashtags)
+
+VISUAL_DIRECTION:
+(brief visual/aesthetic direction, 1-2 sentences)`
 
   const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
@@ -48,30 +95,10 @@ export async function POST(request: Request) {
     body: JSON.stringify({
       model: 'gpt-4o-mini',
       messages: [
-        {
-          role: 'system',
-          content: `You are ViralPilot, an expert content strategist.
-
-Generate content for this plan item. Return ONLY the structured output below with no extra commentary:
-
-HOOK:
-(a short attention-grabbing opening line)
-
-SCRIPT:
-(a short script or scene direction, 2-4 sentences)
-
-CAPTION:
-(a social media caption, 1-2 sentences)
-
-HASHTAGS:
-(5-8 relevant hashtags)
-
-VISUAL_DIRECTION:
-(brief visual/aesthetic direction, 1-2 sentences)`,
-        },
+        { role: 'system', content: systemPrompt },
         {
           role: 'user',
-          content: `Day: ${day}\nTitle: ${title}\nPlatform: ${platform}\nProject: ${projectName} (${projectType || 'General'})\nDescription: ${description || 'N/A'}`,
+          content: `Day: ${day}\nTitle: ${title}\nPlatform: ${platform}\nProject: ${projectName} (${projectMode || 'General'})\nDescription: ${description || 'N/A'}`,
         },
       ],
     }),
@@ -118,7 +145,6 @@ VISUAL_DIRECTION:
 
   if (insertError) {
     console.error('Supabase insert error:', insertError)
-    // Still return the content even if save fails
     return NextResponse.json({ success: true, content, saved: null })
   }
 

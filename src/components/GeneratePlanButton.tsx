@@ -6,15 +6,17 @@ import { useRouter } from 'next/navigation'
 export default function GeneratePlanButton({
   projectId,
   projectName,
-  projectType,
+  projectMode,
   description,
   hasExistingPlan = false,
+  label,
 }: {
   projectId: string
   projectName: string
-  projectType: string
+  projectMode: string
   description: string
   hasExistingPlan?: boolean
+  label?: string
 }) {
   const [loading, setLoading] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
@@ -31,7 +33,7 @@ export default function GeneratePlanButton({
         body: JSON.stringify({
           projectId,
           projectName,
-          projectType,
+          projectMode,
           description,
         }),
       })
@@ -67,7 +69,7 @@ export default function GeneratePlanButton({
         onClick={handleClick}
         disabled={loading}
       >
-        {loading ? 'Generating...' : 'Generate Plan'}
+        {loading ? 'Generating...' : (label || 'Generate Plan')}
       </button>
 
       {showConfirm && (

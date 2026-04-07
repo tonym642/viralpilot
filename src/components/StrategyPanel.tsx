@@ -20,6 +20,7 @@ type InterviewData = {
 type Project = {
   id: string
   name: string
+  mode: string | null
   type: string | null
   description: string | null
 }
@@ -54,7 +55,7 @@ export default function StrategyPanel({
   if (!localInterview?.interview_completed && !editing) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, textAlign: 'center', padding: '40px 20px' }}>
-        <h2 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 700 }}>
+        <h2 style={{ margin: '0 0 8px 0', fontSize: '16px', fontWeight: 700 }}>
           No strategy yet
         </h2>
         <p className="muted" style={{ margin: '0 0 20px 0', fontSize: '13px', maxWidth: '340px', lineHeight: '1.6' }}>
@@ -81,7 +82,7 @@ export default function StrategyPanel({
       <MusicInterview
         projectId={project.id}
         projectName={project.name}
-        projectType={project.type || ''}
+        projectMode={project.mode || ''}
         projectDescription={project.description || ''}
         initialAnswers={prefill}
         skipPlanGeneration
@@ -99,7 +100,7 @@ export default function StrategyPanel({
   return (
     <div style={{ flex: 1, overflowY: 'auto', scrollbarWidth: 'none', padding: '4px 0' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-        <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>Strategy</h2>
+        <h2 style={{ margin: 0, fontSize: '14px', fontWeight: 700 }}>Strategy</h2>
         <button
           className="vp-btn"
           style={{ fontSize: '11px', height: '28px', padding: '0 10px' }}
@@ -111,7 +112,7 @@ export default function StrategyPanel({
 
       {strategyChanged && (
         <div style={{
-          padding: '8px 12px',
+          padding: '6px 12px',
           marginBottom: '14px',
           borderRadius: '8px',
           background: 'rgba(90,154,245,0.08)',
@@ -134,11 +135,11 @@ export default function StrategyPanel({
               fontWeight: 700,
               textTransform: 'uppercase',
               letterSpacing: '0.08em',
-              color: 'rgba(255,255,255,0.25)',
+              color: 'rgba(255,255,255,0.32)',
             }}>
               {f.label}
             </h4>
-            <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255,255,255,0.7)', lineHeight: '1.6' }}>
+            <p style={{ margin: 0, fontSize: '13px', color: '#c0cad8', lineHeight: '1.6' }}>
               {val}
             </p>
           </div>
@@ -155,11 +156,11 @@ export default function StrategyPanel({
               fontWeight: 700,
               textTransform: 'uppercase',
               letterSpacing: '0.08em',
-              color: 'rgba(255,255,255,0.25)',
+              color: 'rgba(255,255,255,0.32)',
             }}>
               Context Summary
             </h4>
-            <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.6' }}>
+            <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255,255,255,0.45)', lineHeight: '1.6' }}>
               {localInterview.context_summary}
             </p>
           </div>
@@ -184,10 +185,10 @@ export default function StrategyPanel({
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: '#0f1724',
+              background: '#0c1320',
               border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: '12px',
-              padding: '20px',
+              borderRadius: '10px',
+              padding: '16px',
               width: '360px',
               maxWidth: '90vw',
             }}
@@ -201,14 +202,14 @@ export default function StrategyPanel({
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
               <button
                 className="vp-btn"
-                style={{ fontSize: '12px', height: '32px', padding: '0 12px' }}
+                style={{ fontSize: '12px', height: '28px', padding: '0 12px' }}
                 onClick={() => setShowConfirm(false)}
               >
                 Cancel
               </button>
               <button
                 className="btn-primary"
-                style={{ fontSize: '12px', height: '32px', padding: '0 12px' }}
+                style={{ fontSize: '12px', height: '28px', padding: '0 12px' }}
                 onClick={() => {
                   setShowConfirm(false)
                   setEditing(true)

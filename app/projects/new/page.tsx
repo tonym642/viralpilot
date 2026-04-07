@@ -4,11 +4,13 @@ import { useState } from 'react'
 import { supabase } from '@/src/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 
+const MODES = ['Music', 'Athlete'] as const
+
 export default function NewProjectPage() {
   const router = useRouter()
 
   const [name, setName] = useState('')
-  const [type, setType] = useState('')
+  const [mode, setMode] = useState<string>('Music')
   const [description, setDescription] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -20,7 +22,8 @@ export default function NewProjectPage() {
     const { error } = await supabase.from('projects').insert([
       {
         name,
-        type,
+        mode,
+        type: mode,
         description,
       },
     ])
@@ -50,12 +53,48 @@ export default function NewProjectPage() {
           onChange={(e) => setName(e.target.value)}
         />
 
-        <input
-          className="input"
-          placeholder="Type (music, business, etc)"
-          value={type}
-          onChange={(e) => setType(e.target.value)}
-        />
+        <div>
+          <label style={{
+            display: 'block',
+            fontSize: '11px',
+            fontWeight: 600,
+            color: 'rgba(255,255,255,0.35)',
+            marginBottom: '4px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em',
+          }}>
+            Mode
+          </label>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {MODES.map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMode(m)}
+                style={{
+                  flex: 1,
+                  padding: '10px 14px',
+                  borderRadius: '8px',
+                  border: mode === m
+                    ? '1px solid rgba(90,154,245,0.4)'
+                    : '1px solid rgba(255,255,255,0.06)',
+                  background: mode === m
+                    ? 'rgba(90,154,245,0.1)'
+                    : 'rgba(255,255,255,0.03)',
+                  color: mode === m ? '#f0f4fa' : 'rgba(255,255,255,0.5)',
+                  fontSize: '13px',
+                  fontFamily: 'inherit',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s',
+                  textAlign: 'center',
+                }}
+              >
+                {m}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <textarea
           className="input"

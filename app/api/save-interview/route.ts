@@ -14,16 +14,25 @@
     differentiator text,
     assets_preference text,
     context_summary text,
+    raw_strategy_text text,
+    structured_strategy jsonb,
     interview_completed boolean default true,
-    created_at timestamp default now()
+    created_at timestamp default now(),
+    updated_at timestamp default now()
   );
 
   -- Add unique constraint so one interview per project
   alter table project_interviews add constraint project_interviews_project_unique unique (project_id);
+
+  -- If table already exists, run these ALTER statements instead:
+  -- alter table project_interviews add column if not exists raw_strategy_text text;
+  -- alter table project_interviews add column if not exists structured_strategy jsonb;
+  -- alter table project_interviews add column if not exists updated_at timestamp default now();
 */
 
 import { NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/src/lib/supabaseAdmin'
+import { buildRawStrategyText, buildStructuredStrategy } from '@/src/lib/strategy'
 
 export async function POST(request: Request) {
   const body = await request.json()
@@ -48,6 +57,9 @@ export async function POST(request: Request) {
     answers.assets_preference && `Assets: ${answers.assets_preference}`,
   ].filter(Boolean).join('. ')
 
+  const rawStrategyText = buildRawStrategyText(answers)
+  const structuredStrategy = buildStructuredStrategy(answers)
+
   const { data, error } = await supabaseAdmin
     .from('project_interviews')
     .upsert(
@@ -63,7 +75,10 @@ export async function POST(request: Request) {
         differentiator: answers.differentiator,
         assets_preference: answers.assets_preference || null,
         context_summary: summary,
+        raw_strategy_text: rawStrategyText,
+        structured_strategy: structuredStrategy,
         interview_completed: true,
+        updated_at: new Date().toISOString(),
       },
       { onConflict: 'project_id' }
     )
