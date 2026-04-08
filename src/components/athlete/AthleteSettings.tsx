@@ -153,7 +153,7 @@ export default function AthleteSettings({
       </div>
 
       {/* Top row — full width, 2 columns */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px', flexShrink: 0 }}>
+      <div className="vp-settings-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px', flexShrink: 0 }}>
         {/* --- Project Actions --- */}
         <SettingsCard title="Project Actions">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -188,7 +188,7 @@ export default function AthleteSettings({
       </div>
 
       {/* Bottom row — full width, fills remaining height */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', flex: 1, minHeight: 0 }}>
+      <div className="vp-settings-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', flex: 1, minHeight: 0 }}>
         {/* --- Content Preferences --- */}
         <SettingsCard title="Content Preferences">
           <p style={{ margin: '0 0 10px 0', fontSize: '11px', color: 'var(--text-faint)' }}>These settings will influence future content generation.</p>

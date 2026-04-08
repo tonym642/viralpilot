@@ -1125,4 +1125,125 @@ select.input option {
   .vp-brand-text {
     font-size: 12px;
   }
+
+  /* Touch-friendly buttons */
+  .btn-primary,
+  .vp-btn-primary {
+    min-height: 36px;
+    padding: 0 14px;
+    font-size: 13px;
+  }
+
+  .vp-btn {
+    min-height: 34px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+
+  .vp-btn-ghost {
+    min-height: 30px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+
+  /* Mobile action bar — sticky at bottom */
+  .vp-mobile-action-bar {
+    position: sticky;
+    bottom: 0;
+    background: var(--surface-1);
+    border-top: 1px solid var(--border-subtle);
+    padding: 10px 16px;
+    display: flex;
+    gap: 8px;
+    z-index: 40;
+  }
+
+  .vp-mobile-action-bar button {
+    flex: 1;
+    min-height: 40px;
+    font-size: 13px;
+  }
+
+  /* Copy button — larger touch target on mobile */
+  .vp-copy-btn {
+    min-height: 32px;
+    min-width: 52px;
+    font-size: 11px !important;
+  }
+
+  /* Form inputs — larger on mobile */
+  .input {
+    min-height: 38px;
+    font-size: 14px !important;
+    padding: 8px 12px;
+  }
+
+  select.input {
+    min-height: 38px;
+    font-size: 14px !important;
+  }
+
+  /* Split left panel — taller tap rows */
+  .vp-split-left > div > div {
+    min-height: 42px;
+  }
+
+  /* Content sections — add copy tap area */
+  .vp-content-section {
+    position: relative;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.015);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .vp-content-section-copy {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+  }
+
+  /* Status badges — slightly larger */
+  .vp-status-badge-mobile {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 4px;
+  }
+
+  /* Athlete profile/brand form rows */
+  .vp-form-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
+  }
+
+  .vp-form-row > div:first-child,
+  .vp-form-row > label {
+    width: 100% !important;
+  }
+
+  /* Two-column form grids → stack */
+  .vp-form-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Overview cards grid → stack */
+  .vp-overview-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Settings grid → stack */
+  .vp-settings-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Project header — compact */
+  .vp-project-header {
+    flex-wrap: wrap;
+    gap: 6px !important;
+  }
+
+  .vp-project-header h1 {
+    font-size: 15px !important;
+  }
 }

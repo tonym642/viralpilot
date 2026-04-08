@@ -286,35 +286,35 @@ export default function AthleteContentPlan({
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                       <p style={{ margin: 0, fontSize: '11px', color: 'var(--text-faint)' }}>Review and refine your content before marking it ready.</p>
                       {/* Hook */}
-                      <ContentSection label="Hook">
+                      <ContentSection label="Hook" copyText={selectedItem.hook}>
                         <p style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#edf0f5', lineHeight: '1.5', borderLeft: '2px solid rgba(90,154,245,0.3)', paddingLeft: '10px' }}>
                           {selectedItem.hook}
                         </p>
                       </ContentSection>
 
                       {/* Script */}
-                      <ContentSection label="Script">
+                      <ContentSection label="Script" copyText={selectedItem.generatedContent!.script}>
                         <p style={{ margin: 0, fontSize: '13px', color: '#c0cad8', lineHeight: '1.75', whiteSpace: 'pre-wrap' }}>
                           {selectedItem.generatedContent!.script}
                         </p>
                       </ContentSection>
 
                       {/* Caption */}
-                      <ContentSection label="Caption">
+                      <ContentSection label="Caption" copyText={selectedItem.generatedContent!.caption}>
                         <p style={{ margin: 0, fontSize: '13px', color: '#c0cad8', lineHeight: '1.75' }}>
                           {selectedItem.generatedContent!.caption}
                         </p>
                       </ContentSection>
 
                       {/* Hashtags */}
-                      <ContentSection label="Hashtags">
+                      <ContentSection label="Hashtags" copyText={selectedItem.generatedContent!.hashtags.join(' ')}>
                         <p style={{ margin: 0, fontSize: '12px', color: 'rgba(255,255,255,0.45)' }}>
                           {selectedItem.generatedContent!.hashtags.join('  ')}
                         </p>
                       </ContentSection>
 
                       {/* Visual Direction */}
-                      <ContentSection label="Visual Direction">
+                      <ContentSection label="Visual Direction" copyText={selectedItem.generatedContent!.visualDirection}>
                         <p style={{ margin: 0, fontSize: '12px', color: 'rgba(255,255,255,0.45)', lineHeight: '1.6' }}>
                           {selectedItem.generatedContent!.visualDirection}
                         </p>
@@ -384,10 +384,24 @@ function StatusBadge({ status }: { status: string }) {
   return <span style={{ fontSize: '9px', padding: '1px 6px', borderRadius: '3px', fontWeight: 600, textTransform: 'capitalize', background: s.bg, color: s.fg }}>{status}</span>
 }
 
-function ContentSection({ label, children }: { label: string; children: React.ReactNode }) {
+function ContentSection({ label, children, copyText }: { label: string; children: React.ReactNode; copyText?: string }) {
+  const [copied, setCopied] = useState(false)
+  const handleCopy = () => {
+    if (!copyText) return
+    navigator.clipboard.writeText(copyText)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
   return (
     <div>
-      <h4 style={{ margin: '0 0 6px 0', fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.32)' }}>{label}</h4>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+        <h4 style={{ margin: 0, fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.32)' }}>{label}</h4>
+        {copyText && (
+          <button onClick={handleCopy} className="vp-copy-btn" style={{ background: copied ? 'rgba(90,154,245,0.1)' : 'transparent', border: 'none', cursor: 'pointer', fontSize: '10px', fontFamily: 'inherit', fontWeight: 500, color: copied ? '#5a9af5' : 'rgba(255,255,255,0.2)', padding: '3px 8px', borderRadius: '4px', transition: 'all 0.15s' }}>
+            {copied ? 'Copied' : 'Copy'}
+          </button>
+        )}
+      </div>
       {children}
     </div>
   )

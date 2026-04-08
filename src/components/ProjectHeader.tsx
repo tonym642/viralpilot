@@ -51,7 +51,7 @@ export default function ProjectHeader({ project }: { project: Project }) {
 
   return (
     <>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '12px', flexShrink: 0 }}>
+      <div className="vp-project-header" style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '12px', flexShrink: 0 }}>
         <Link
           href="/projects"
           className="vp-btn"

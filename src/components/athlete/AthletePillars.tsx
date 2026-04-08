@@ -149,7 +149,7 @@ export default function AthletePillars({
       </div>
 
       {/* Two-column split */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', flex: 1, minHeight: 0 }}>
+      <div className="vp-form-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', flex: 1, minHeight: 0 }}>
         {/* Left column — Default pillars */}
         <div style={{
           background: 'var(--surface-2)',
