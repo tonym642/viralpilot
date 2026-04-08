@@ -5,6 +5,8 @@ import ProjectChat from './ProjectChat'
 import GeneratePlanButton from './GeneratePlanButton'
 import ContentLibrary from './ContentLibrary'
 import MusicInterview from './MusicInterview'
+import MusicOverview from './MusicOverview'
+import MusicSettings from './MusicSettings'
 import StrategyPanel from './StrategyPanel'
 import MusicAssetsPanel from './MusicAssetsPanel'
 import HelpButton from './HelpModal'
@@ -36,11 +38,13 @@ type Project = {
 }
 
 const tabs = [
+  { key: 'overview', label: 'Overview' },
   { key: 'strategy', label: 'Strategy' },
   { key: 'plan', label: 'Content Plan' },
   { key: 'assets', label: 'Assets' },
   { key: 'chat', label: 'AI Chat' },
   { key: 'library', label: 'Library' },
+  { key: 'settings', label: 'Settings' },
 ] as const
 
 type TabKey = (typeof tabs)[number]['key']
@@ -85,7 +89,7 @@ export default function ProjectTabs({
 }) {
   const [interviewDone, setInterviewDone] = useState(initialInterviewCompleted)
   const [currentStrategyStatus, setCurrentStrategyStatus] = useState(initialStrategyStatus)
-  const [active, setActive] = useState<TabKey>('strategy')
+  const [active, setActive] = useState<TabKey>('overview')
   const [platformFilter, setPlatformFilter] = useState<string>('All')
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(
     plans.length > 0 ? plans[0].id : null
@@ -232,7 +236,7 @@ export default function ProjectTabs({
           display: 'flex',
           alignItems: 'center',
           gap: '4px',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          borderBottom: '1px solid var(--border-subtle)',
           marginBottom: '14px',
           flexShrink: 0,
           overflowX: 'auto',
@@ -270,6 +274,18 @@ export default function ProjectTabs({
 
       {/* Tab content */}
       <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        {active === 'overview' && (
+          <MusicOverview
+            project={project}
+            interviewData={interviewData}
+            interviewCompleted={interviewDone}
+            strategyStatus={currentStrategyStatus}
+            plans={plans}
+            contentItems={contentItems}
+            onNavigate={setActive}
+          />
+        )}
+
         {active === 'library' && (
           <ContentLibrary initialItems={contentItems} />
         )}
@@ -525,8 +541,8 @@ export default function ProjectTabs({
               <div
                 style={{
                   flex: 1,
-                  background: 'rgba(13,19,30,0.9)',
-                  border: '1px solid rgba(255,255,255,0.06)',
+                  background: 'var(--surface-2)',
+                  border: '1px solid var(--border-default)',
                   borderRadius: '10px',
                   padding: '14px 16px',
                   overflowY: 'auto',
@@ -562,7 +578,7 @@ export default function ProjectTabs({
                       </p>
                     </div>
 
-                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', marginBottom: '16px' }} />
+                    <div style={{ borderTop: '1px solid var(--border-subtle)', marginBottom: '16px' }} />
 
                     {/* Generated content */}
                     {generating && !currentContent && (
@@ -632,7 +648,7 @@ export default function ProjectTabs({
                           return (
                             <div key={section.label} style={{ marginBottom: '18px' }}>
                               {i > 0 && (
-                                <div style={{ borderTop: '1px solid rgba(255,255,255,0.04)', marginBottom: '18px' }} />
+                                <div style={{ borderTop: '1px solid var(--border-subtle)', marginBottom: '18px' }} />
                               )}
                               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
                                 <h4 style={{
@@ -722,6 +738,17 @@ export default function ProjectTabs({
             </div>
             <ProjectChat projectId={project.id} initialMessages={messages} />
           </div>
+        )}
+
+        {active === 'settings' && (
+          <MusicSettings
+            project={project}
+            interviewData={interviewData}
+            interviewCompleted={interviewDone}
+            strategyStatus={currentStrategyStatus}
+            plans={plans}
+            contentItems={contentItems}
+          />
         )}
       </div>
     </div>

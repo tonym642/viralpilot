@@ -64,8 +64,8 @@ export default function ProjectHeader({ project }: { project: Project }) {
           fontSize: '10px',
           padding: '2px 8px',
           borderRadius: '4px',
-          background: 'rgba(139,124,245,0.1)',
-          color: '#b0a4f5',
+          background: project.mode === 'Music' ? 'rgba(139,92,246,0.12)' : project.mode === 'Athlete' ? 'rgba(245,158,11,0.12)' : 'rgba(139,124,245,0.1)',
+          color: project.mode === 'Music' ? '#a78bfa' : project.mode === 'Athlete' ? '#fbbf24' : '#b0a4f5',
           fontWeight: 600,
         }}>
           {project.mode || project.type || 'No mode'}
@@ -150,7 +150,7 @@ export default function ProjectHeader({ project }: { project: Project }) {
                         borderRadius: '8px',
                         border: mode === m
                           ? '1px solid rgba(90,154,245,0.4)'
-                          : '1px solid rgba(255,255,255,0.06)',
+                          : '1px solid var(--border-default)',
                         background: mode === m
                           ? 'rgba(90,154,245,0.1)'
                           : 'rgba(255,255,255,0.03)',

@@ -9,20 +9,24 @@ import { helpContent } from '@/src/lib/helpContent'
 export default async function ProjectsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ show?: string }>
+  searchParams: Promise<{ show?: string; mode?: string }>
 }) {
   const params = await searchParams
   const showArchived = params.show === 'archived'
+  const filterMode = params.mode || null
 
   const { data: allProjects, error } = await supabase
     .from('projects')
     .select('*')
     .order('created_at', { ascending: false })
 
-  // Split active and archived
+  // Split active and archived, then filter by mode
   const activeProjects = allProjects?.filter((p) => !p.archived) || []
   const archivedProjects = allProjects?.filter((p) => p.archived) || []
-  const projects = showArchived ? archivedProjects : activeProjects
+  const modeFiltered = filterMode
+    ? (showArchived ? archivedProjects : activeProjects).filter((p) => p.mode === filterMode)
+    : (showArchived ? archivedProjects : activeProjects)
+  const projects = modeFiltered
 
   // Fetch content counts per project
   const contentCounts: Record<string, number> = {}
@@ -42,7 +46,7 @@ export default async function ProjectsPage({
   return (
     <main className="vp-content">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-        <h1 className="vp-greeting">Welcome back</h1>
+        <h1 className="vp-greeting">{filterMode ? `${filterMode} Projects` : 'Welcome back'}</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Link href="/projects/new" className="btn-primary" style={{ fontSize: '12px', height: '30px', padding: '0 14px' }}>
             + New Project
@@ -141,7 +145,7 @@ export default async function ProjectsPage({
       {projects.length > 0 && (
         <div className="vp-card" style={{ marginBottom: '18px' }}>
           <div className="vp-card-header">
-            <h3>{showArchived ? 'Archived Projects' : 'All Projects'}</h3>
+            <h3>{showArchived ? 'Archived Projects' : filterMode ? `${filterMode} Projects` : 'All Projects'}</h3>
             <div style={{ display: 'flex', gap: '8px' }}>
               {showArchived ? (
                 <Link href="/projects" style={{ fontSize: '11px', color: 'rgba(255,255,255,0.42)', textDecoration: 'none' }}>
@@ -189,7 +193,15 @@ export default async function ProjectsPage({
                   </span>
                   <span className="vp-table-col vp-col-date">{created}</span>
                   <span className="vp-table-col vp-col-type">
-                    <span className="vp-plan-platform">{project.mode || project.type || 'N/A'}</span>
+                    <span style={{
+                      fontSize: '10px',
+                      padding: '1px 6px',
+                      borderRadius: '3px',
+                      fontWeight: 500,
+                      whiteSpace: 'nowrap',
+                      background: project.mode === 'Music' ? 'rgba(139,92,246,0.12)' : project.mode === 'Athlete' ? 'rgba(245,158,11,0.12)' : 'rgba(139,124,245,0.08)',
+                      color: project.mode === 'Music' ? '#a78bfa' : project.mode === 'Athlete' ? '#fbbf24' : '#a99cf0',
+                    }}>{project.mode || project.type || 'N/A'}</span>
                   </span>
                   <span className="vp-table-col vp-col-status">
                     <span className={`vp-status-dot ${count > 0 ? 'active' : 'draft'}`} />

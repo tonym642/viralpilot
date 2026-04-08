@@ -2,6 +2,7 @@ import { supabase } from '@/src/lib/supabaseClient'
 import Link from 'next/link'
 import ProjectTabs from '@/src/components/ProjectTabs'
 import ProjectHeader from '@/src/components/ProjectHeader'
+import AthleteLayout from '@/src/components/athlete/AthleteLayout'
 
 type ProjectPageProps = {
   params: Promise<{ id: string }>
@@ -46,8 +47,24 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
     )
   }
 
+  // Athlete mode — dedicated layout
+  if (project.mode === 'Athlete') {
+    const athleteData = interview?.structured_strategy as Record<string, unknown> | null
+    return (
+      <main style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 48px)', overflow: 'hidden', background: 'var(--surface-0)' }}>
+        <div style={{ padding: '12px 24px 0', flexShrink: 0 }}>
+          <ProjectHeader project={project} />
+        </div>
+        <AthleteLayout
+          project={project}
+          athleteData={athleteData as Record<string, unknown> | null}
+        />
+      </main>
+    )
+  }
+
   return (
-    <main style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 48px)', overflow: 'hidden', padding: '16px 32px 24px' }}>
+    <main style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 48px)', overflow: 'hidden', padding: '16px 32px 24px', background: 'var(--surface-0)' }}>
       <ProjectHeader project={project} />
 
       <ProjectTabs

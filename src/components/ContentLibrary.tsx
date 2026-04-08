@@ -155,7 +155,7 @@ export default function ContentLibrary({
         style={{
           display: 'flex',
           gap: '4px',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          borderBottom: '1px solid var(--border-subtle)',
           marginBottom: '14px',
           flexShrink: 0,
         }}
@@ -244,8 +244,8 @@ export default function ContentLibrary({
         <div
           style={{
             flex: 1,
-            background: 'rgba(13,19,30,0.9)',
-            border: '1px solid rgba(255,255,255,0.06)',
+            background: 'var(--surface-2)',
+            border: '1px solid var(--border-default)',
             borderRadius: '12px',
             padding: '18px 20px',
             overflowY: 'auto',

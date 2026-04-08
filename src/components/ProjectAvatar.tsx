@@ -50,15 +50,21 @@ export default function ProjectAvatar({ name, mode, coverImage, size = 28 }: Pro
     )
   }
 
-  // Mode icon
+  // Mode icon + color
   const hasIcon = mode === 'Music' || mode === 'Athlete'
+
+  const gradientMap: Record<string, string> = {
+    Music: 'linear-gradient(135deg, #8b5cf6, #6d28d9)',
+    Athlete: 'linear-gradient(135deg, #f59e0b, #d97706)',
+  }
+  const bg = mode && gradientMap[mode] ? gradientMap[mode] : 'linear-gradient(135deg, #5a9af5, #8b7cf5)'
 
   return (
     <div style={{
       width: size,
       height: size,
       borderRadius: radius,
-      background: 'linear-gradient(135deg, #5a9af5, #8b7cf5)',
+      background: bg,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',

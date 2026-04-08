@@ -213,8 +213,8 @@ function StrategyChat({
       flexDirection: 'column',
       flex: 1,
       minHeight: 0,
-      background: 'rgba(13,19,30,0.8)',
-      border: '1px solid rgba(255,255,255,0.06)',
+      background: 'var(--surface-2)',
+      border: '1px solid var(--border-default)',
       borderRadius: '10px',
       overflow: 'hidden',
       opacity: disabled ? 0.5 : 1,
@@ -222,7 +222,7 @@ function StrategyChat({
     }}>
       <div style={{
         padding: '10px 12px 8px',
-        borderBottom: '1px solid rgba(255,255,255,0.04)',
+        borderBottom: '1px solid var(--border-subtle)',
         flexShrink: 0,
         display: 'flex',
         alignItems: 'center',
@@ -288,7 +288,7 @@ function StrategyChat({
                     <div key={i} style={{
                       padding: '8px 10px',
                       borderRadius: '8px',
-                      border: isApplied ? '1px solid rgba(74,222,128,0.2)' : '1px solid rgba(255,255,255,0.06)',
+                      border: isApplied ? '1px solid rgba(74,222,128,0.2)' : '1px solid var(--border-default)',
                       background: isApplied ? 'rgba(74,222,128,0.04)' : 'rgba(255,255,255,0.02)',
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
@@ -332,13 +332,13 @@ function StrategyChat({
         <div ref={endRef} />
       </div>
 
-      <div style={{ flexShrink: 0, padding: '6px 10px 8px', borderTop: '1px solid rgba(255,255,255,0.04)', background: 'rgba(10,15,26,0.5)' }}>
+      <div style={{ flexShrink: 0, padding: '6px 10px 8px', borderTop: '1px solid var(--border-subtle)', background: 'var(--surface-1)' }}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '6px' }}>
           {quickActions.map((action) => (
             <button key={action} onClick={() => sendMessage(action)} disabled={loading || disabled}
-              style={{ padding: '3px 8px', fontSize: '10px', fontFamily: 'inherit', fontWeight: 500, borderRadius: '5px', border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)', color: 'rgba(255,255,255,0.45)', cursor: 'pointer', transition: 'all 0.12s', whiteSpace: 'nowrap' }}
+              style={{ padding: '3px 8px', fontSize: '10px', fontFamily: 'inherit', fontWeight: 500, borderRadius: '5px', border: '1px solid var(--border-default)', background: 'rgba(255,255,255,0.02)', color: 'rgba(255,255,255,0.45)', cursor: 'pointer', transition: 'all 0.12s', whiteSpace: 'nowrap' }}
               onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(90,154,245,0.3)'; e.currentTarget.style.color = '#c8d1de' }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = 'rgba(255,255,255,0.45)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.color = 'rgba(255,255,255,0.45)' }}
             >{action}</button>
           ))}
         </div>
@@ -555,7 +555,7 @@ export default function StrategyPanel({
         {/* Center: Strategy Fields */}
         <div style={{ flex: '0 0 30%', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           <div style={{
-            background: 'rgba(13,19,30,0.8)', border: '1px solid rgba(255,255,255,0.06)',
+            background: 'var(--surface-2)', border: '1px solid var(--border-default)',
             borderRadius: '10px', padding: '14px', flex: 1, overflowY: 'auto',
           }}>
             <h3 style={{ margin: '0 0 14px 0', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(255,255,255,0.38)' }}>
@@ -580,7 +580,7 @@ export default function StrategyPanel({
         {/* Right: AI Insights */}
         <div style={{ flex: '0 0 30%', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           <div style={{
-            background: 'rgba(13,19,30,0.8)', border: '1px solid rgba(255,255,255,0.06)',
+            background: 'var(--surface-2)', border: '1px solid var(--border-default)',
             borderRadius: '10px', padding: '14px', flex: 1, overflowY: 'auto',
           }}>
             <h3 style={{ margin: '0 0 14px 0', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'rgba(90,154,245,0.6)' }}>
@@ -648,7 +648,7 @@ export default function StrategyPanel({
         <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
           onClick={() => setShowConfirm(false)}
         >
-          <div onClick={(e) => e.stopPropagation()} style={{ background: '#0c1320', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '16px', width: '360px', maxWidth: '90vw' }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: 'var(--surface-2)', border: '1px solid var(--border-default)', borderRadius: '10px', padding: '16px', width: '360px', maxWidth: '90vw' }}>
             <h3 style={{ margin: '0 0 8px 0', fontSize: '15px', fontWeight: 600 }}>Edit your strategy?</h3>
             <p style={{ margin: '0 0 18px 0', fontSize: '13px', lineHeight: '1.6', color: 'rgba(255,255,255,0.45)' }}>
               This will reset your audit status and require re-approval.
@@ -666,7 +666,7 @@ export default function StrategyPanel({
       {/* Approval success modal */}
       {showApprovalModal && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
-          <div style={{ background: '#0c1320', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '24px', width: '400px', maxWidth: '90vw', textAlign: 'center' }}>
+          <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-default)', borderRadius: '10px', padding: '24px', width: '400px', maxWidth: '90vw', textAlign: 'center' }}>
             <div style={{ fontSize: '32px', marginBottom: '12px' }}>✅</div>
             <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', fontWeight: 700 }}>Strategy Approved</h3>
             <p style={{ margin: '0 0 20px 0', fontSize: '13px', lineHeight: '1.6', color: 'rgba(255,255,255,0.55)' }}>

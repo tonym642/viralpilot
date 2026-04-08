@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ── ViralPilot — Design System v2 ── */
-/* Tight, high-contrast dark UI inspired by Linear/Vercel */
+/* Layered dark UI with warm grays */
 
 * {
   box-sizing: border-box;
@@ -19,9 +19,10 @@
   --accent-purple: #8b7cf5;
   --accent-green: #4ade80;
 
-  --surface-0: #0a0f1a;
-  --surface-1: #0c1320;
-  --surface-2: rgba(13, 19, 30, 0.95);
+  --surface-0: #15181e;
+  --surface-1: #1a1d24;
+  --surface-2: #1f2229;
+  --surface-3: #252830;
   --border-subtle: rgba(255, 255, 255, 0.06);
   --border-default: rgba(255, 255, 255, 0.08);
   --border-hover: rgba(255, 255, 255, 0.14);
@@ -40,7 +41,7 @@
 
 body {
   margin: 0;
-  background: var(--surface-1);
+  background: var(--surface-0);
   color: var(--text-secondary);
   font-family: var(--font-geist-sans), Inter, system-ui, -apple-system, sans-serif;
   font-size: 13px;
@@ -60,6 +61,114 @@ a {
   color: var(--accent-blue);
 }
 
+/* ── App layout ── */
+
+.vp-app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── Sidebar ── */
+
+.vp-sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  background: var(--surface-1);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.vp-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 16px 18px 12px;
+  text-decoration: none;
+}
+
+.vp-sidebar-brand-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 13px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.vp-sidebar-brand-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+
+.vp-sidebar-brand-sub {
+  font-size: 9px;
+  color: var(--text-faint);
+  letter-spacing: 0.02em;
+  margin-top: 1px;
+}
+
+.vp-sidebar-nav {
+  list-style: none;
+  margin: 0;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.vp-sidebar-nav li a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  text-decoration: none;
+  transition: background 0.12s, color 0.12s;
+}
+
+.vp-sidebar-nav li a:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary);
+}
+
+.vp-sidebar-nav li a.active {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+}
+
+.vp-sidebar-icon {
+  font-size: 14px;
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+/* ── Main area (right of sidebar) ── */
+
+.vp-main-area {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 /* ── Shell ── */
 
 .vp-shell,
@@ -76,10 +185,9 @@ a {
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
-  height: 44px;
+  height: 48px;
   border-bottom: 1px solid var(--border-subtle);
-  background: rgba(10, 15, 26, 0.8);
-  backdrop-filter: blur(14px);
+  background: var(--surface-1);
   position: sticky;
   top: 0;
   z-index: 50;
@@ -157,7 +265,9 @@ a {
 
 .vp-content {
   width: 100%;
-  padding: 20px 28px;
+  padding: 24px 32px;
+  background: var(--surface-0);
+  flex: 1;
 }
 
 .vp-greeting {
@@ -191,7 +301,7 @@ a {
 /* ── Cards ── */
 
 .card {
-  background: var(--surface-2);
+  background: var(--surface-3);
   border: 1px solid var(--border-subtle);
   border-radius: 10px;
   padding: 14px 16px;
@@ -207,7 +317,7 @@ a {
 
 .vp-card {
   background: var(--surface-2);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-default);
   border-radius: 10px;
   overflow: hidden;
   overflow-x: auto;
@@ -388,7 +498,7 @@ a {
   font-size: 13px;
   color: inherit;
   text-decoration: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--border-subtle);
   transition: background 0.12s;
   cursor: pointer;
 }
@@ -587,6 +697,22 @@ a {
   transition: border-color 0.15s;
 }
 
+select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+  cursor: pointer;
+}
+
+select.input option {
+  background: var(--surface-2);
+  color: var(--text-primary);
+  padding: 8px 10px;
+}
+
 .input::placeholder {
   color: var(--text-faint);
 }
@@ -636,7 +762,7 @@ a {
   flex-direction: column;
   height: 100%;
   background: var(--surface-2);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-default);
   border-radius: 10px;
   overflow: hidden;
 }

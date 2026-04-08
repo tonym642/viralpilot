@@ -118,8 +118,8 @@ export default function MusicAssetsPanel({
         <div style={{
           position: 'relative',
           borderRadius: '8px',
-          border: `1px solid ${isDirty ? 'rgba(90,154,245,0.3)' : savedLyrics ? 'rgba(74,222,128,0.15)' : highlightMissing && !lyrics ? 'rgba(251,191,36,0.3)' : 'rgba(255,255,255,0.06)'}`,
-          background: 'rgba(13,19,30,0.6)',
+          border: `1px solid ${isDirty ? 'rgba(90,154,245,0.3)' : savedLyrics ? 'rgba(74,222,128,0.15)' : highlightMissing && !lyrics ? 'rgba(251,191,36,0.3)' : 'var(--border-default)'}`,
+          background: 'var(--surface-2)',
           transition: 'border-color 0.2s',
           flex: 1,
           display: 'flex',
@@ -188,8 +188,8 @@ export default function MusicAssetsPanel({
               fontSize: '13px',
               lineHeight: '1.6',
               color: '#c8d1de',
-              background: 'rgba(13,19,30,0.6)',
-              border: `1px solid ${songStyle !== savedSongStyle ? 'rgba(90,154,245,0.3)' : savedSongStyle ? 'rgba(74,222,128,0.15)' : highlightMissing && !songStyle ? 'rgba(251,191,36,0.3)' : 'rgba(255,255,255,0.06)'}`,
+              background: 'var(--surface-2)',
+              border: `1px solid ${songStyle !== savedSongStyle ? 'rgba(90,154,245,0.3)' : savedSongStyle ? 'rgba(74,222,128,0.15)' : highlightMissing && !songStyle ? 'rgba(251,191,36,0.3)' : 'var(--border-default)'}`,
               borderRadius: '8px',
               outline: 'none',
               resize: 'vertical',
@@ -200,7 +200,7 @@ export default function MusicAssetsPanel({
         </div>
 
         {/* Divider */}
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }} />
+        <div style={{ borderTop: '1px solid var(--border-subtle)' }} />
 
         {/* Media Uploads */}
         <div>

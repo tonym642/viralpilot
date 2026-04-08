@@ -77,7 +77,7 @@ export default function NewProjectPage() {
                   borderRadius: '8px',
                   border: mode === m
                     ? '1px solid rgba(90,154,245,0.4)'
-                    : '1px solid rgba(255,255,255,0.06)',
+                    : '1px solid var(--border-default)',
                   background: mode === m
                     ? 'rgba(90,154,245,0.1)'
                     : 'rgba(255,255,255,0.03)',

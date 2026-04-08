@@ -251,8 +251,8 @@ export default function MusicInterview({
           {/* Left: Strategy fields in a card */}
           <div style={{
             flex: '0 0 40%',
-            background: 'rgba(13,19,30,0.8)',
-            border: '1px solid rgba(255,255,255,0.06)',
+            background: 'var(--surface-2)',
+            border: '1px solid var(--border-default)',
             borderRadius: '10px',
             padding: '14px',
             overflowY: 'auto',
@@ -319,7 +319,7 @@ export default function MusicInterview({
         <span className="muted" style={{ fontSize: '11px' }}>
           {step + 1} of {totalQuestions}
         </span>
-        <div style={{ flex: 1, height: '2px', background: 'rgba(255,255,255,0.06)', borderRadius: '1px' }}>
+        <div style={{ flex: 1, height: '2px', background: 'var(--border-subtle)', borderRadius: '1px' }}>
           <div style={{
             height: '100%',
             width: `${((step + 1) / totalQuestions) * 100}%`,
@@ -349,7 +349,7 @@ export default function MusicInterview({
                 borderRadius: '8px',
                 border: answers[current.key] === opt
                   ? '1px solid rgba(90,154,245,0.4)'
-                  : '1px solid rgba(255,255,255,0.06)',
+                  : '1px solid var(--border-default)',
                 background: answers[current.key] === opt
                   ? 'rgba(90,154,245,0.1)'
                   : 'rgba(255,255,255,0.03)',
