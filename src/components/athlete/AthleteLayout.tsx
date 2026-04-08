@@ -73,7 +73,7 @@ export default function AthleteLayout({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       {/* Horizontal tab bar */}
-      <div style={{
+      <div className="vp-tab-bar" style={{
         display: 'flex', alignItems: 'center', gap: '4px',
         borderBottom: '1px solid var(--border-subtle)', padding: '0 28px', flexShrink: 0, overflowX: 'auto',
       }}>
@@ -97,7 +97,7 @@ export default function AthleteLayout({
       </div>
 
       {/* Content area */}
-      <div style={{ flex: 1, minWidth: 0, padding: '20px 28px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <div className="vp-content-area" style={{ flex: 1, minWidth: 0, padding: '20px 28px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {active === 'overview' && (
           <AthleteOverview
             project={project}

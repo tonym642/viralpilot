@@ -51,8 +51,8 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   if (project.mode === 'Athlete') {
     const athleteData = interview?.structured_strategy as Record<string, unknown> | null
     return (
-      <main style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 48px)', overflow: 'hidden', background: 'var(--surface-0)' }}>
-        <div style={{ padding: '12px 24px 0', flexShrink: 0 }}>
+      <main className="vp-project-detail" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 48px)', overflow: 'hidden', background: 'var(--surface-0)' }}>
+        <div className="vp-project-detail-header" style={{ padding: '12px 24px 0', flexShrink: 0 }}>
           <ProjectHeader project={project} />
         </div>
         <AthleteLayout
@@ -64,7 +64,7 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
   }
 
   return (
-    <main style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 48px)', overflow: 'hidden', padding: '16px 32px 24px', background: 'var(--surface-0)' }}>
+    <main className="vp-project-detail" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 48px)', overflow: 'hidden', padding: '16px 32px 24px', background: 'var(--surface-0)' }}>
       <ProjectHeader project={project} />
 
       <ProjectTabs

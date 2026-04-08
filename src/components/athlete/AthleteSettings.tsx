@@ -149,7 +149,7 @@ export default function AthleteSettings({
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflowY: 'auto' }}>
       <div style={{ marginBottom: '20px', flexShrink: 0 }}>
         <h1 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>Settings</h1>
-        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>Project controls and configuration.</p>
+        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>Manage strategy behavior, content preferences, and project actions.</p>
       </div>
 
       {/* Top row — full width, 2 columns */}

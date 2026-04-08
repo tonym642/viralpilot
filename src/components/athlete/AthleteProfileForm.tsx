@@ -67,7 +67,7 @@ export default function AthleteProfileForm({
             Athlete Profile
           </h1>
           <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>
-            Basic information about the athlete.
+            Set up the athlete&apos;s core information and goals.
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -76,6 +76,10 @@ export default function AthleteProfileForm({
             {saving ? 'Saving...' : 'Save Profile'}
           </button>
         </div>
+      </div>
+
+      <div style={{ padding: '8px 12px', marginBottom: '14px', borderRadius: '6px', background: 'rgba(90,154,245,0.04)', border: '1px solid rgba(90,154,245,0.1)', fontSize: '12px', color: 'rgba(90,154,245,0.7)', flexShrink: 0 }}>
+        This information defines how your content strategy is built.
       </div>
 
       {/* Two-column split */}
@@ -153,7 +157,7 @@ export default function AthleteProfileForm({
             minHeight: 0,
           }}>
             <SectionLabel>Goals</SectionLabel>
-            <Row label="Primary Goal">
+            <Row label="Primary Goal" hint="What are you trying to achieve with content?">
               <select className="input" value={form.primary_goal} onChange={(e) => set('primary_goal', e.target.value)} style={{ fontSize: '13px' }}>
                 <option value="">Select a goal...</option>
                 {PRIMARY_GOALS.map((g) => <option key={g} value={g}>{g}</option>)}
@@ -165,7 +169,7 @@ export default function AthleteProfileForm({
                 {PRIMARY_GOALS.map((g) => <option key={g} value={g}>{g}</option>)}
               </select>
             </Row>
-            <Row label="Target Audience">
+            <Row label="Target Audience" hint="Who should see your content?">
               <input className="input" value={form.target_audience} onChange={(e) => set('target_audience', e.target.value)} placeholder="e.g. College recruiters, local fans" style={{ fontSize: '13px' }} />
             </Row>
           </div>
@@ -183,18 +187,13 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   )
 }
 
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
+function Row({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-      <label style={{
-        width: '120px',
-        flexShrink: 0,
-        fontSize: '12px',
-        fontWeight: 500,
-        color: 'var(--text-tertiary)',
-      }}>
-        {label}
-      </label>
+      <div style={{ width: '120px', flexShrink: 0 }}>
+        <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-tertiary)' }}>{label}</label>
+        {hint && <p style={{ margin: '1px 0 0 0', fontSize: '10px', color: 'var(--text-faint)', lineHeight: '1.3' }}>{hint}</p>}
+      </div>
       <div style={{ flex: 1 }}>
         {children}
       </div>

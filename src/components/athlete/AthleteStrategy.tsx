@@ -113,13 +113,13 @@ export default function AthleteStrategy({
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
         <div style={{ marginBottom: '20px', flexShrink: 0 }}>
           <h1 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>Strategy</h1>
-          <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>Generate a content strategy based on the athlete&apos;s profile, brand, and pillars.</p>
+          <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>Your strategy defines what to post, where to post, and how to grow.</p>
         </div>
         <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-default)', borderRadius: '10px', padding: '40px', textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ fontSize: '32px', marginBottom: '12px' }}>🎯</div>
           <h3 style={{ margin: '0 0 8px 0', fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>Ready to Generate Strategy</h3>
           <p style={{ margin: '0 0 20px 0', fontSize: '13px', color: 'var(--text-tertiary)', lineHeight: '1.6', maxWidth: '400px' }}>
-            All prerequisites are complete. Generate a personalized content strategy based on the athlete&apos;s profile and brand identity.
+            All prerequisites are complete. Generate a personalized content strategy based on your profile and brand identity.
           </p>
           <button className="btn-primary" style={{ fontSize: '13px', height: '36px', padding: '0 20px' }} onClick={handleGenerate} disabled={generating}>
             {generating ? 'Generating...' : 'Generate Strategy'}
@@ -168,6 +168,18 @@ export default function AthleteStrategy({
         <span>Version {strategy.version}</span>
         {strategy.approvedAt && <span>Approved {new Date(strategy.approvedAt).toLocaleDateString()}</span>}
       </div>
+
+      {/* Contextual help */}
+      {!strategy.approved && (
+        <div style={{ padding: '8px 12px', marginBottom: '12px', borderRadius: '6px', background: 'rgba(251,191,36,0.05)', border: '1px solid rgba(251,191,36,0.12)', fontSize: '12px', color: 'rgba(251,191,36,0.7)', flexShrink: 0 }}>
+          Review and approve your strategy before moving forward.
+        </div>
+      )}
+      {strategy.approved && (
+        <div style={{ padding: '8px 12px', marginBottom: '12px', borderRadius: '6px', background: 'rgba(74,222,128,0.04)', border: '1px solid rgba(74,222,128,0.1)', fontSize: '12px', color: 'rgba(74,222,128,0.6)', flexShrink: 0 }}>
+          This is your blueprint. Everything in your content plan will follow this.
+        </div>
+      )}
 
       {/* Strategy content — two columns */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', flex: 1, minHeight: 0, overflowY: 'auto' }}>

@@ -143,7 +143,7 @@ export default function AthleteContentPlan({
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px', flexShrink: 0 }}>
         <div>
           <h1 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>Content Plan</h1>
-          <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>Your structured content calendar.</p>
+          <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>Each day is a content idea. Click a day to generate and review content.</p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div style={{ display: 'flex', gap: '4px' }}>
@@ -220,9 +220,9 @@ export default function AthleteContentPlan({
           </div>
 
           {/* Split view */}
-          <div style={{ display: 'flex', gap: '16px', flex: 1, minHeight: 0 }}>
+          <div className="vp-split-layout" style={{ display: 'flex', gap: '16px', flex: 1, minHeight: 0 }}>
             {/* Left: item list */}
-            <div style={{ width: '40%', flexShrink: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <div className="vp-split-left" style={{ width: '40%', flexShrink: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '2px' }}>
               {filteredItems.map((item) => {
                 const isSelected = selectedId === item.id
                 const isPosted = item.status === 'posted'
@@ -253,7 +253,7 @@ export default function AthleteContentPlan({
             </div>
 
             {/* Right: detail panel */}
-            <div style={{
+            <div className="vp-split-right" style={{
               flex: 1, background: 'var(--surface-2)', border: '1px solid var(--border-default)',
               borderRadius: '10px', padding: '14px 16px', overflowY: 'auto',
               display: 'flex', flexDirection: 'column',
@@ -284,6 +284,7 @@ export default function AthleteContentPlan({
                   {/* Content preview or empty state */}
                   {hasGeneratedContent ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      <p style={{ margin: 0, fontSize: '11px', color: 'var(--text-faint)' }}>Review and refine your content before marking it ready.</p>
                       {/* Hook */}
                       <ContentSection label="Hook">
                         <p style={{ margin: 0, fontSize: '15px', fontWeight: 600, color: '#edf0f5', lineHeight: '1.5', borderLeft: '2px solid rgba(90,154,245,0.3)', paddingLeft: '10px' }}>
@@ -321,7 +322,7 @@ export default function AthleteContentPlan({
                     </div>
                   ) : (
                     <p className="muted" style={{ margin: 0, fontSize: '12px' }}>
-                      Click Generate Content to create hook, script, caption, and more.
+                      Click Generate Content to create scripts, captions, and visuals for this day.
                     </p>
                   )}
 

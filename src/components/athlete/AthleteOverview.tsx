@@ -112,7 +112,7 @@ export default function AthleteOverview({
       {/* Title */}
       <div style={{ marginBottom: '16px', flexShrink: 0 }}>
         <h1 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>{project.name}</h1>
-        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>{project.description || 'Athlete project'}</p>
+        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>{project.description || 'Track progress, review your strategy, and continue building content.'}</p>
       </div>
 
       {/* Progress + Next Step */}

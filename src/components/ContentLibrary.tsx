@@ -191,9 +191,9 @@ export default function ContentLibrary({
       </div>
 
       {/* Split view */}
-      <div style={{ display: 'flex', gap: '20px', flex: 1, minHeight: 0 }}>
+      <div className="vp-split-layout" style={{ display: 'flex', gap: '20px', flex: 1, minHeight: 0 }}>
         {/* Left: list */}
-        <div style={{ width: '40%', flexShrink: 0, overflowY: 'auto', scrollbarWidth: 'none' }}>
+        <div className="vp-split-left" style={{ width: '40%', flexShrink: 0, overflowY: 'auto', scrollbarWidth: 'none' }}>
           {filtered.length === 0 ? (
             <p className="muted" style={{ margin: 0, fontSize: '13px' }}>
               No {activeStatus} items.
@@ -242,6 +242,7 @@ export default function ContentLibrary({
 
         {/* Right: detail */}
         <div
+          className="vp-split-right"
           style={{
             flex: 1,
             background: 'var(--surface-2)',

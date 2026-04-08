@@ -130,7 +130,7 @@ export default function AthletePillars({
             Content Pillars
           </h1>
           <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>
-            Select at least 3 pillars that define your content strategy.
+            Choose the types of content you will consistently create.
             <span style={{ marginLeft: '8px', color: selected.length >= 3 ? '#4ade80' : 'rgba(251,191,36,0.7)', fontWeight: 500 }}>
               {selected.length} selected {selected.length < 3 && '(minimum 3)'}
             </span>
@@ -142,6 +142,10 @@ export default function AthletePillars({
             {saving ? 'Saving...' : 'Save Pillars'}
           </button>
         </div>
+      </div>
+
+      <div style={{ padding: '8px 12px', marginBottom: '14px', borderRadius: '6px', background: 'rgba(90,154,245,0.04)', border: '1px solid rgba(90,154,245,0.1)', fontSize: '12px', color: 'rgba(90,154,245,0.7)', flexShrink: 0 }}>
+        Stick to a few pillars so your content feels focused and recognizable.
       </div>
 
       {/* Two-column split */}

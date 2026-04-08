@@ -232,6 +232,7 @@ export default function ProjectTabs({
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       {/* Tab bar */}
       <div
+        className="vp-tab-bar"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -273,7 +274,7 @@ export default function ProjectTabs({
       </div>
 
       {/* Tab content */}
-      <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <div className="vp-content-area" style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {active === 'overview' && (
           <MusicOverview
             project={project}
@@ -398,9 +399,9 @@ export default function ProjectTabs({
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: '20px', flex: 1, minHeight: 0 }}>
+            <div className="vp-split-layout" style={{ display: 'flex', gap: '20px', flex: 1, minHeight: 0 }}>
               {/* Left: plan list */}
-              <div style={{ width: '40%', flexShrink: 0, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+              <div className="vp-split-left" style={{ width: '40%', flexShrink: 0, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', flexShrink: 0 }}>
                   <span className="muted" style={{ fontSize: '12px' }}>
                     {plans.length > 0 ? `${filteredPlans.length} of ${plans.length} days` : ''}
@@ -539,6 +540,7 @@ export default function ProjectTabs({
 
               {/* Right: detail panel */}
               <div
+                className="vp-split-right"
                 style={{
                   flex: 1,
                   background: 'var(--surface-2)',

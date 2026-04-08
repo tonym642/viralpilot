@@ -66,7 +66,7 @@ export default function AthleteBrandForm({
             Brand Identity
           </h1>
           <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>
-            Define the athlete&apos;s personal brand and story.
+            Define how the athlete shows up on social media.
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -75,6 +75,10 @@ export default function AthleteBrandForm({
             {saving ? 'Saving...' : 'Save Brand'}
           </button>
         </div>
+      </div>
+
+      <div style={{ padding: '8px 12px', marginBottom: '14px', borderRadius: '6px', background: 'rgba(90,154,245,0.04)', border: '1px solid rgba(90,154,245,0.1)', fontSize: '12px', color: 'rgba(90,154,245,0.7)', flexShrink: 0 }}>
+        Your content should feel consistent. This defines your personality and style.
       </div>
 
       {/* Two-column split */}
@@ -91,7 +95,7 @@ export default function AthleteBrandForm({
           minHeight: 0,
         }}>
           <SectionLabel>Personality &amp; Vibe</SectionLabel>
-          <Row label="Personality Type">
+          <Row label="Personality Type" hint="How you naturally come across">
             <select className="input" value={form.personality_type} onChange={(e) => set('personality_type', e.target.value)} style={{ fontSize: '13px' }}>
               <option value="">Select type...</option>
               {PERSONALITY_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
@@ -128,7 +132,7 @@ export default function AthleteBrandForm({
             <Row label="Interests">
               <textarea className="input" value={form.interests_outside_sport} onChange={(e) => set('interests_outside_sport', e.target.value)} placeholder="Hobbies, passions, side projects..." rows={2} style={{ fontSize: '13px', resize: 'vertical' }} />
             </Row>
-            <Row label="Story">
+            <Row label="Story" hint="What makes your journey unique">
               <textarea className="input" value={form.story_background} onChange={(e) => set('story_background', e.target.value)} placeholder="Origin story, challenges overcome..." rows={3} style={{ fontSize: '13px', resize: 'vertical' }} />
             </Row>
           </div>
@@ -173,18 +177,13 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   )
 }
 
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
+function Row({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-      <label style={{
-        width: '120px',
-        flexShrink: 0,
-        fontSize: '12px',
-        fontWeight: 500,
-        color: 'var(--text-tertiary)',
-      }}>
-        {label}
-      </label>
+      <div style={{ width: '120px', flexShrink: 0 }}>
+        <label style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-tertiary)' }}>{label}</label>
+        {hint && <p style={{ margin: '1px 0 0 0', fontSize: '10px', color: 'var(--text-faint)', lineHeight: '1.3' }}>{hint}</p>}
+      </div>
       <div style={{ flex: 1 }}>
         {children}
       </div>

@@ -85,12 +85,12 @@ export default function AthleteLibrary({
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
         <div style={{ marginBottom: '20px' }}>
           <h1 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>Library</h1>
-          <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>All generated content lives here.</p>
+          <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>Use this page to review, manage, and finalize your content.</p>
         </div>
         <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-default)', borderRadius: '10px', padding: '40px', textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ fontSize: '32px', marginBottom: '12px' }}>📁</div>
           <h3 style={{ margin: '0 0 6px 0', fontSize: '15px', fontWeight: 600, color: 'var(--text-primary)' }}>No Generated Content Yet</h3>
-          <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: 'var(--text-tertiary)' }}>Generate content from the Content Plan page and it will appear here.</p>
+          <p style={{ margin: '0 0 16px 0', fontSize: '13px', color: 'var(--text-tertiary)' }}>Generate content from the Content Plan to start building your library.</p>
           <button className="btn-primary" onClick={() => onNavigate('content-plan')}>Go to Content Plan</button>
         </div>
       </div>
@@ -102,7 +102,7 @@ export default function AthleteLibrary({
       {/* Header */}
       <div style={{ marginBottom: '14px', flexShrink: 0 }}>
         <h1 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: 600, color: 'var(--text-primary)' }}>Library</h1>
-        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>All generated content lives here.</p>
+        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-tertiary)' }}>Use this page to review, manage, and finalize your content.</p>
       </div>
 
       {/* Status tabs */}
@@ -130,9 +130,9 @@ export default function AthleteLibrary({
       </div>
 
       {/* Split view */}
-      <div style={{ display: 'flex', gap: '20px', flex: 1, minHeight: 0 }}>
+      <div className="vp-split-layout" style={{ display: 'flex', gap: '20px', flex: 1, minHeight: 0 }}>
         {/* Left: list */}
-        <div style={{ width: '40%', flexShrink: 0, overflowY: 'auto' }}>
+        <div className="vp-split-left" style={{ width: '40%', flexShrink: 0, overflowY: 'auto' }}>
           {filtered.length === 0 ? (
             <p className="muted" style={{ margin: 0, fontSize: '13px' }}>No {activeStatus} items.</p>
           ) : (
@@ -182,7 +182,7 @@ export default function AthleteLibrary({
         </div>
 
         {/* Right: detail */}
-        <div style={{
+        <div className="vp-split-right" style={{
           flex: 1, background: 'var(--surface-2)', border: '1px solid var(--border-default)',
           borderRadius: '10px', padding: '14px 16px', overflowY: 'auto',
           display: 'flex', flexDirection: 'column',
