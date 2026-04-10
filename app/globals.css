@@ -160,6 +160,22 @@ a {
   opacity: 0.7;
 }
 
+/* ── Project mode: hide app shell when inside a project ── */
+
+body.vp-in-project .vp-sidebar {
+  display: none;
+}
+
+body.vp-in-project .vp-topbar,
+body.vp-in-project .topbar {
+  display: none;
+}
+
+body.vp-in-project .vp-mobile-topbar {
+  display: none;
+}
+
+
 /* ── Main area (right of sidebar) ── */
 
 .vp-main-area {
@@ -295,6 +311,12 @@ a {
 @media (max-width: 900px) {
   .vp-dashboard-grid {
     grid-template-columns: 1fr;
+  }
+  .vp-workflow-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  .vp-details-split {
+    flex-direction: column !important;
   }
 }
 
@@ -519,7 +541,7 @@ a {
 }
 
 .vp-col-name {
-  flex: 0 0 20%;
+  flex: 1 1 20%;
   gap: 8px;
 }
 
@@ -536,6 +558,16 @@ a {
   min-width: 80px;
 }
 
+.vp-col-genre {
+  flex: 0 0 120px;
+  min-width: 80px;
+}
+
+.vp-col-lang {
+  flex: 0 0 100px;
+  min-width: 70px;
+}
+
 .vp-table-desc-text {
   color: var(--text-tertiary);
   white-space: nowrap;
@@ -545,7 +577,7 @@ a {
 
 .vp-col-items {
   flex: 0 0 72px;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 .vp-count-badge {
@@ -561,16 +593,19 @@ a {
   flex: 0 0 72px;
   color: var(--text-tertiary);
   font-size: 12px;
+  justify-content: flex-end;
 }
 
 .vp-col-type {
   flex: 0 0 72px;
+  justify-content: flex-end;
 }
 
 .vp-col-status {
   flex: 0 0 80px;
   display: inline-flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 5px;
   font-size: 11px;
   color: var(--text-tertiary);
@@ -1029,6 +1064,11 @@ select.input option {
     display: none;
   }
 
+  .vp-col-genre,
+  .vp-col-lang {
+    display: none;
+  }
+
   .vp-col-date {
     display: none;
   }
@@ -1229,6 +1269,11 @@ select.input option {
 
   /* Overview cards grid → stack */
   .vp-overview-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Workflow dashboard cards → single column on mobile */
+  .vp-workflow-grid {
     grid-template-columns: 1fr !important;
   }
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import ProjectChat from './ProjectChat'
 import GeneratePlanButton from './GeneratePlanButton'
 import ContentLibrary from './ContentLibrary'
@@ -9,6 +9,7 @@ import MusicOverview from './MusicOverview'
 import MusicSettings from './MusicSettings'
 import StrategyPanel from './StrategyPanel'
 import MusicAssetsPanel from './MusicAssetsPanel'
+import ProjectHeader from './ProjectHeader'
 import HelpButton from './HelpModal'
 import { helpContent } from '@/src/lib/helpContent'
 
@@ -109,6 +110,12 @@ export default function ProjectTabs({
     }
     return map
   })
+
+  // Hide app sidebar/topbar while inside a project
+  useEffect(() => {
+    document.body.classList.add('vp-in-project')
+    return () => { document.body.classList.remove('vp-in-project') }
+  }, [])
 
   // Strategy-aware plan state
   const planIsOutdated = (() => {
@@ -230,6 +237,9 @@ export default function ProjectTabs({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+      {/* Project header with hamburger + Dashboard | Exit */}
+      <ProjectHeader project={project} onNavigate={(tab) => setActive(tab as TabKey)} />
+
       {/* Tab bar */}
       <div
         className="vp-tab-bar"
@@ -278,12 +288,10 @@ export default function ProjectTabs({
         {active === 'overview' && (
           <MusicOverview
             project={project}
-            interviewData={interviewData}
             interviewCompleted={interviewDone}
             strategyStatus={currentStrategyStatus}
             plans={plans}
             contentItems={contentItems}
-            onNavigate={setActive}
           />
         )}
 

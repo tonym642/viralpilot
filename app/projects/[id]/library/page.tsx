@@ -1,47 +1,20 @@
 import { supabase } from '@/src/lib/supabaseClient'
-import Link from 'next/link'
-import ContentLibrary from '@/src/components/ContentLibrary'
+import LibraryTabs from './LibraryTabs'
+import type { ProjectAsset } from '@/src/lib/assetTypes'
 
-type LibraryPageProps = {
-  params: Promise<{ id: string }>
-}
+type LibraryPageProps = { params: Promise<{ id: string }> }
 
 export default async function LibraryPage({ params }: LibraryPageProps) {
   const { id } = await params
 
-  const [{ data: project, error }, { data: items }] = await Promise.all([
-    supabase.from('projects').select('*').eq('id', id).single(),
-    supabase
-      .from('content_items')
-      .select('*')
-      .eq('project_id', id)
-      .order('day', { ascending: true }),
+  const [{ data: items }, { data: interviewRows }] = await Promise.all([
+    supabase.from('content_items').select('*').eq('project_id', id).order('day', { ascending: true }),
+    supabase.from('project_interviews').select('structured_strategy').eq('project_id', id).limit(1),
   ])
 
-  if (error || !project) {
-    return (
-      <main className="page-shell">
-        <h1 style={{ fontSize: '18px' }}>Project not found</h1>
-        <Link href="/projects" className="vp-btn-primary" style={{ marginTop: '12px' }}>Back to Projects</Link>
-      </main>
-    )
-  }
+  const structured = interviewRows?.[0]?.structured_strategy as Record<string, unknown> | null
+  const assets = ((structured?.project_assets ?? []) as ProjectAsset[])
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
-  return (
-    <main style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 48px)', overflow: 'hidden', padding: '16px 32px 24px' }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '12px', flexShrink: 0 }}>
-        <Link
-          href={`/projects/${id}`}
-          className="vp-btn"
-          style={{ height: '28px', padding: '0 10px', fontSize: '12px' }}
-        >
-          ← Back
-        </Link>
-        <h1 className="page-title" style={{ margin: 0 }}>{project.name}</h1>
-        <span className="muted" style={{ fontSize: '13px' }}>Content Library</span>
-      </div>
-
-      <ContentLibrary initialItems={items || []} />
-    </main>
-  )
+  return <LibraryTabs initialItems={items || []} initialAssets={assets} />
 }

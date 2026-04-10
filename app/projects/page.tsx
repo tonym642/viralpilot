@@ -30,13 +30,25 @@ export default async function ProjectsPage({
 
   // Fetch content counts per project
   const contentCounts: Record<string, number> = {}
+  // Fetch details (genre, language) per project from project_interviews
+  const projectDetails: Record<string, { genre?: string; language?: string }> = {}
   if (allProjects && allProjects.length > 0) {
-    const { data: counts } = await supabase
-      .from('content_items')
-      .select('project_id')
+    const [{ data: counts }, { data: interviews }] = await Promise.all([
+      supabase.from('content_items').select('project_id'),
+      supabase.from('project_interviews').select('project_id, structured_strategy'),
+    ])
     if (counts) {
       for (const row of counts) {
         contentCounts[row.project_id] = (contentCounts[row.project_id] || 0) + 1
+      }
+    }
+    if (interviews) {
+      for (const row of interviews) {
+        const ss = row.structured_strategy as Record<string, unknown> | null
+        const info = (ss?.project_details as Record<string, Record<string, string>> | null)?.info
+        if (info) {
+          projectDetails[row.project_id] = { genre: info.genre, language: info.language }
+        }
       }
     }
   }
@@ -162,7 +174,8 @@ export default async function ProjectsPage({
             {/* Table header */}
             <div className="vp-table-header">
               <span className="vp-table-col vp-col-name">Name</span>
-              <span className="vp-table-col vp-col-desc">Description</span>
+              <span className="vp-table-col vp-col-genre">Genre</span>
+              <span className="vp-table-col vp-col-lang">Language</span>
               <span className="vp-table-col vp-col-items">Content</span>
               <span className="vp-table-col vp-col-date">Created</span>
               <span className="vp-table-col vp-col-type">Mode</span>
@@ -172,6 +185,7 @@ export default async function ProjectsPage({
             {/* Rows */}
             {projects.map((project) => {
               const count = contentCounts[project.id] ?? 0
+              const details = projectDetails[project.id]
               const created = new Date(project.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
               return (
                 <Link
@@ -185,8 +199,11 @@ export default async function ProjectsPage({
                     <span className="vp-table-name-text">{project.name}</span>
                     {project.mode === 'Music' && count > 0 && !showArchived && <EqualizerIndicator size={12} />}
                   </span>
-                  <span className="vp-table-col vp-col-desc vp-table-desc-text">
-                    {project.description || '—'}
+                  <span className="vp-table-col vp-col-genre vp-table-desc-text">
+                    {details?.genre || '—'}
+                  </span>
+                  <span className="vp-table-col vp-col-lang vp-table-desc-text">
+                    {details?.language || '—'}
                   </span>
                   <span className="vp-table-col vp-col-items">
                     <span className="vp-count-badge">{count}</span>
