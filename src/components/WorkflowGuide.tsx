@@ -22,7 +22,7 @@ export default function WorkflowGuide({
   const router = useRouter()
 
   return (
-    <div style={{
+    <div className="vp-workflow-guide" style={{
       marginTop: '20px',
       padding: '16px 18px',
       borderRadius: '10px',

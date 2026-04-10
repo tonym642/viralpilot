@@ -59,6 +59,7 @@ export default function ProjectInternalLayout({
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: 'var(--surface-0)' }}>
       {/* ── Top bar ── */}
       <div
+        className="vp-project-topbar"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -96,14 +97,14 @@ export default function ProjectInternalLayout({
         </h1>
         {genre && (
           <>
-            <span style={{ color: 'var(--border-default)', fontSize: '16px', fontWeight: 300 }}>|</span>
-            <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-tertiary)', flexShrink: 0 }}>{genre}</span>
+            <span className="vp-project-meta-divider" style={{ color: 'var(--border-default)', fontSize: '16px', fontWeight: 300 }}>|</span>
+            <span className="vp-project-meta-text" style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-tertiary)', flexShrink: 0 }}>{genre}</span>
           </>
         )}
         {language && (
           <>
-            <span style={{ color: 'var(--border-default)', fontSize: '16px', fontWeight: 300 }}>|</span>
-            <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-tertiary)', flexShrink: 0 }}>{language}</span>
+            <span className="vp-project-meta-divider" style={{ color: 'var(--border-default)', fontSize: '16px', fontWeight: 300 }}>|</span>
+            <span className="vp-project-meta-text" style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-tertiary)', flexShrink: 0 }}>{language}</span>
           </>
         )}
         <span
@@ -143,7 +144,7 @@ export default function ProjectInternalLayout({
       {/* ── Secondary workflow nav (Music mode only, hidden on dashboard) ── */}
       {isMusicMode && !isDashboard && (
         <div
-          className="vp-tab-bar"
+          className="vp-tab-bar vp-project-nav"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -151,6 +152,7 @@ export default function ProjectInternalLayout({
             padding: '8px 24px 0',
             flexShrink: 0,
             overflowX: 'auto',
+            scrollbarWidth: 'none',
           }}
         >
           {/* Dashboard link */}
@@ -195,12 +197,12 @@ export default function ProjectInternalLayout({
 
           {/* Progress stepper */}
           <span style={{ flex: 1 }} />
-          {completion && <WorkflowProgressBar completion={completion} />}
+          <div className="vp-workflow-progress">{completion && <WorkflowProgressBar completion={completion} />}</div>
         </div>
       )}
 
       {/* ── Page content ── */}
-      <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'auto', padding: '32px 24px 24px' }}>
+      <div className="vp-project-content" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'auto', padding: '32px 24px 24px' }}>
         {children}
       </div>
 

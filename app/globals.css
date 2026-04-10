@@ -314,9 +314,19 @@ body.vp-in-project .vp-mobile-topbar {
   }
   .vp-workflow-grid {
     grid-template-columns: repeat(3, 1fr) !important;
+    height: auto !important;
   }
   .vp-details-split {
     flex-direction: column !important;
+  }
+  .vp-details-split > div {
+    width: 100% !important;
+  }
+  .vp-strategy-split {
+    flex-direction: column !important;
+  }
+  .vp-strategy-split > div {
+    width: 100% !important;
   }
 }
 
@@ -1290,5 +1300,117 @@ select.input option {
 
   .vp-project-header h1 {
     font-size: 15px !important;
+  }
+
+  /* ── V2 Mobile Fixes ── */
+
+  /* Project internal layout — compact top bar */
+  .vp-project-topbar {
+    padding: 10px 14px !important;
+    gap: 8px !important;
+  }
+
+  .vp-project-topbar h1 {
+    font-size: 15px !important;
+  }
+
+  /* Hide genre/language meta on mobile top bar */
+  .vp-project-meta-divider,
+  .vp-project-meta-text {
+    display: none;
+  }
+
+  /* Hide progress bar on mobile */
+  .vp-workflow-progress {
+    display: none !important;
+  }
+
+  /* Nav menu — smaller, scrollable */
+  .vp-project-nav {
+    padding: 4px 14px 0 !important;
+    gap: 0 !important;
+  }
+
+  .vp-project-nav a {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+  }
+
+  /* Page content — less padding on mobile */
+  .vp-project-content {
+    padding: 16px 14px 16px !important;
+  }
+
+  /* Dashboard — mobile adjustments */
+  .vp-dashboard-intro {
+    padding-top: 12px !important;
+  }
+
+  .vp-dashboard-intro h1 {
+    font-size: 22px !important;
+  }
+
+  .vp-dashboard-intro p {
+    font-size: 12px !important;
+  }
+
+  .vp-dashboard-waveform {
+    display: none !important;
+  }
+
+  .vp-workflow-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    height: auto !important;
+    gap: 10px !important;
+  }
+
+  .vp-workflow-grid .vp-workflow-card-circle {
+    width: 64px !important;
+    height: 64px !important;
+    font-size: 18px !important;
+  }
+
+  /* Strategy split → stack on mobile */
+  .vp-strategy-split {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .vp-strategy-split > div {
+    width: 100% !important;
+  }
+
+  /* Details — field labels stack on mobile */
+  .vp-details-split {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .vp-details-split > div {
+    width: 100% !important;
+  }
+
+  /* Pill selectors — smaller on mobile */
+  .vp-pill-row {
+    gap: 5px !important;
+  }
+
+  /* Content/Scheduler/Library split → already handled by .vp-split-layout */
+
+  /* Strategy right panel tabs — scrollable */
+  .vp-strategy-tabs {
+    overflow-x: auto !important;
+    scrollbar-width: none;
+  }
+
+  /* Workflow guide — stack on mobile */
+  .vp-workflow-guide {
+    flex-direction: column !important;
+    gap: 10px !important;
+    text-align: center;
+  }
+
+  .vp-workflow-guide > div:last-child {
+    justify-content: center !important;
   }
 }

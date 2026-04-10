@@ -109,7 +109,7 @@ export default function MusicOverview({
   const navigateTo = (path: string) => router.push(`${basePath}/${path}`)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, alignItems: 'center', paddingTop: '24px' }}>
+    <div className="vp-dashboard-intro" style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, alignItems: 'center', paddingTop: '24px' }}>
       {/* ---- Intro section ---- */}
       <div style={{ textAlign: 'center', marginBottom: '40px', flexShrink: 0, maxWidth: '580px' }}>
         <h1 style={{ margin: '0 0 16px 0', fontSize: '28px', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.3px' }}>
@@ -124,7 +124,7 @@ export default function MusicOverview({
       </div>
 
       {/* ---- Waveform visual ---- */}
-      <svg width="320" height="48" viewBox="0 0 320 48" style={{ marginBottom: '32px', flexShrink: 0 }}>
+      <svg className="vp-dashboard-waveform" width="320" height="48" viewBox="0 0 320 48" style={{ marginBottom: '32px', flexShrink: 0 }}>
         {Array.from({ length: 64 }, (_, i) => {
           const x = i * 5
           const baseH = 6 + Math.sin(i * 0.5) * 14 + Math.cos(i * 0.3) * 8
