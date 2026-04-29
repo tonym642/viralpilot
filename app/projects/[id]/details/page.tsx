@@ -1,10 +1,11 @@
-import { supabase } from '@/src/lib/supabaseClient'
+import { createSupabaseServer } from '@/src/lib/supabase-server'
 import DetailsEditor from './DetailsEditor'
 
 type DetailsPageProps = { params: Promise<{ id: string }> }
 
 export default async function DetailsPage({ params }: DetailsPageProps) {
   const { id } = await params
+  const supabase = await createSupabaseServer()
 
   const { data: interviewRows } = await supabase
     .from('project_interviews')

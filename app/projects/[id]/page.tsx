@@ -1,4 +1,4 @@
-import { supabase } from '@/src/lib/supabaseClient'
+import { createSupabaseServer } from '@/src/lib/supabase-server'
 import MusicOverview from '@/src/components/MusicOverview'
 import AthleteLayout from '@/src/components/athlete/AthleteLayout'
 
@@ -8,6 +8,7 @@ type ProjectPageProps = {
 
 export default async function ProjectDashboardPage({ params }: ProjectPageProps) {
   const { id } = await params
+  const supabase = await createSupabaseServer()
 
   const [{ data: project, error }, { data: plans }, { data: contentItems }, { data: interviewRows }] = await Promise.all([
     supabase.from('projects').select('*').eq('id', id).single(),

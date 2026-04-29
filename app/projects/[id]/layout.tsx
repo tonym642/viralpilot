@@ -1,4 +1,4 @@
-import { supabase } from '@/src/lib/supabaseClient'
+import { createSupabaseServer } from '@/src/lib/supabase-server'
 import ProjectInternalLayout from '@/src/components/ProjectInternalLayout'
 import type { WorkflowCompletion } from '@/src/lib/workflowConfig'
 
@@ -9,6 +9,7 @@ type LayoutProps = {
 
 export default async function ProjectLayout({ children, params }: LayoutProps) {
   const { id } = await params
+  const supabase = await createSupabaseServer()
 
   const [{ data: project }, { data: interviewRows }, { data: contentItems }] = await Promise.all([
     supabase.from('projects').select('id, name, mode, type').eq('id', id).single(),

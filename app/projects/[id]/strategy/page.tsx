@@ -1,10 +1,11 @@
-import { supabase } from '@/src/lib/supabaseClient'
+import { createSupabaseServer } from '@/src/lib/supabase-server'
 import StrategyEditor from './StrategyEditor'
 
 type PageProps = { params: Promise<{ id: string }> }
 
 export default async function StrategyPage({ params }: PageProps) {
   const { id } = await params
+  const supabase = await createSupabaseServer()
 
   const { data: interviewRows } = await supabase
     .from('project_interviews')

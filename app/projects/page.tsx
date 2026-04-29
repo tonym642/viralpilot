@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { supabase } from '@/src/lib/supabaseClient'
+import { createSupabaseServer } from '@/src/lib/supabase-server'
 import ProjectAvatar from '@/src/components/ProjectAvatar'
 import EqualizerIndicator from '@/src/components/EqualizerIndicator'
 import ArchiveButton from '@/src/components/ArchiveButton'
@@ -14,6 +14,8 @@ export default async function ProjectsPage({
   const params = await searchParams
   const showArchived = params.show === 'archived'
   const filterMode = params.mode || null
+
+  const supabase = await createSupabaseServer()
 
   const { data: allProjects, error } = await supabase
     .from('projects')
