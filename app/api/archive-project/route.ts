@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/src/lib/supabaseAdmin'
+import { withAuth } from '@/src/lib/api-auth'
 
 export async function POST(request: Request) {
+  const auth = await withAuth()
+  if ('error' in auth) return auth.error
+  const { supabase } = auth
+
   const body = await request.json()
   const { projectId, archived } = body
 
@@ -12,7 +16,7 @@ export async function POST(request: Request) {
     )
   }
 
-  const { error } = await supabaseAdmin
+  const { error } = await supabase
     .from('projects')
     .update({ archived: !!archived })
     .eq('id', projectId)

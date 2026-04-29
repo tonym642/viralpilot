@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/src/lib/supabaseAdmin'
+import { withAuth } from '@/src/lib/api-auth'
 
 type RouteParams = {
   params: Promise<{ itemId: string }>
 }
 
 export async function PATCH(request: Request, { params }: RouteParams) {
+  const auth = await withAuth()
+  if ('error' in auth) return auth.error
+  const { supabase } = auth
+
   const { itemId } = await params
   const body = await request.json()
 
@@ -24,7 +28,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     )
   }
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabase
     .from('content_items')
     .update(updates)
     .eq('id', itemId)
@@ -43,9 +47,13 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 }
 
 export async function DELETE(_request: Request, { params }: RouteParams) {
+  const auth = await withAuth()
+  if ('error' in auth) return auth.error
+  const { supabase } = auth
+
   const { itemId } = await params
 
-  const { error } = await supabaseAdmin
+  const { error } = await supabase
     .from('content_items')
     .delete()
     .eq('id', itemId)

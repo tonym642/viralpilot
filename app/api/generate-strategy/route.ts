@@ -1,14 +1,11 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/src/lib/supabaseAdmin'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { withAuth, requireProjectOwnership } from '@/src/lib/api-auth'
 
-// ---------------------------------------------------------------------------
-// Load all project context
-// ---------------------------------------------------------------------------
-
-async function loadContext(projectId: string) {
+async function loadContext(supabase: SupabaseClient, projectId: string) {
   const [{ data: project }, { data: interviews }] = await Promise.all([
-    supabaseAdmin.from('projects').select('name, description, mode, song_style').eq('id', projectId).single(),
-    supabaseAdmin.from('project_interviews').select('structured_strategy').eq('project_id', projectId).limit(1),
+    supabase.from('projects').select('name, description, mode, song_style').eq('id', projectId).single(),
+    supabase.from('project_interviews').select('structured_strategy').eq('project_id', projectId).limit(1),
   ])
 
   const ss = (interviews?.[0]?.structured_strategy as Record<string, unknown>) ?? {}
@@ -17,7 +14,6 @@ async function loadContext(projectId: string) {
   const questions = details.questions ?? {}
   const lyrics = details.lyrics ?? {}
 
-  // Track analysis assets
   const assets = ((ss.project_assets ?? []) as Record<string, unknown>[])
   const analysisAsset = assets.find(
     (a) => a.asset_category === 'analysis' && a.source_step === 'track-analysis',
@@ -42,10 +38,6 @@ async function loadContext(projectId: string) {
     trackAnalysis,
   }
 }
-
-// ---------------------------------------------------------------------------
-// Build prompt
-// ---------------------------------------------------------------------------
 
 function buildPrompt(ctx: Awaited<ReturnType<typeof loadContext>>, refinement?: string, existingStrategy?: string) {
   const meta = [
@@ -126,12 +118,8 @@ ${lyricsBlock}
 ${refinementBlock}`
 }
 
-// ---------------------------------------------------------------------------
-// Save strategy
-// ---------------------------------------------------------------------------
-
-async function saveStrategy(projectId: string, strategy: Record<string, unknown>) {
-  const { data } = await supabaseAdmin
+async function saveStrategy(supabase: SupabaseClient, projectId: string, strategy: Record<string, unknown>) {
+  const { data } = await supabase
     .from('project_interviews')
     .select('id, structured_strategy')
     .eq('project_id', projectId)
@@ -139,24 +127,24 @@ async function saveStrategy(projectId: string, strategy: Record<string, unknown>
 
   const row = data?.[0]
   if (!row) {
-    await supabaseAdmin.from('project_interviews').insert({
+    await supabase.from('project_interviews').insert({
       project_id: projectId,
       structured_strategy: { project_strategy: strategy },
     })
   } else {
     const ss = (row.structured_strategy as Record<string, unknown>) ?? {}
-    await supabaseAdmin.from('project_interviews').update({
+    await supabase.from('project_interviews').update({
       structured_strategy: { ...ss, project_strategy: strategy },
     }).eq('id', row.id)
   }
 }
 
-// ---------------------------------------------------------------------------
-// Route
-// ---------------------------------------------------------------------------
-
 export async function POST(request: Request) {
   try {
+    const auth = await withAuth()
+    if ('error' in auth) return auth.error
+    const { supabase } = auth
+
     const body = await request.json()
     const { projectId, refinement, existingStrategy } = body
 
@@ -164,7 +152,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'projectId is required' }, { status: 400 })
     }
 
-    const ctx = await loadContext(projectId)
+    const ownershipError = await requireProjectOwnership(projectId, supabase)
+    if (ownershipError) return ownershipError
+
+    const ctx = await loadContext(supabase, projectId)
 
     if (!ctx.songTitle && !ctx.lyricsText) {
       return NextResponse.json({ success: false, error: 'Add song details before generating a strategy.' }, { status: 400 })
@@ -202,7 +193,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Failed to parse strategy output' }, { status: 500 })
     }
 
-    await saveStrategy(projectId, strategy)
+    await saveStrategy(supabase, projectId, strategy)
 
     return NextResponse.json({ success: true, strategy })
   } catch (err) {

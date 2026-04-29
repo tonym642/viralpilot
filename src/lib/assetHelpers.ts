@@ -40,12 +40,12 @@ async function getInterviewRow(projectId: string) {
   return data?.[0] ?? null
 }
 
-async function ensureInterviewRow(projectId: string) {
+async function ensureInterviewRow(projectId: string, userId: string) {
   let row = await getInterviewRow(projectId)
   if (!row) {
     const { data } = await supabaseAdmin
       .from('project_interviews')
-      .insert({ project_id: projectId, structured_strategy: {} })
+      .insert({ project_id: projectId, user_id: userId, structured_strategy: {} })
       .select('id, structured_strategy')
       .single()
     row = data
@@ -71,6 +71,7 @@ async function writeAssets(rowId: string, structured: Record<string, unknown>, a
 
 export async function uploadProjectAsset({
   projectId,
+  userId,
   file,
   assetName,
   originalFileName,
@@ -81,6 +82,7 @@ export async function uploadProjectAsset({
   metadataJson,
 }: {
   projectId: string
+  userId: string
   file: Buffer | Uint8Array
   assetName: string
   originalFileName: string
@@ -119,7 +121,7 @@ export async function uploadProjectAsset({
   }
 
   // Save record
-  const row = await ensureInterviewRow(projectId)
+  const row = await ensureInterviewRow(projectId, userId)
   const existing = readAssets(row.structured_strategy as Record<string, unknown>)
   existing.push(asset)
   await writeAssets(row.id, row.structured_strategy as Record<string, unknown>, existing)
@@ -133,6 +135,7 @@ export async function uploadProjectAsset({
 
 export async function createProjectAssetRecord({
   projectId,
+  userId,
   assetName,
   assetType,
   assetCategory,
@@ -141,6 +144,7 @@ export async function createProjectAssetRecord({
   metadataJson,
 }: {
   projectId: string
+  userId: string
   assetName: string
   assetType: AssetType
   assetCategory: AssetCategory
@@ -166,7 +170,7 @@ export async function createProjectAssetRecord({
     updated_at: new Date().toISOString(),
   }
 
-  const row = await ensureInterviewRow(projectId)
+  const row = await ensureInterviewRow(projectId, userId)
   const existing = readAssets(row.structured_strategy as Record<string, unknown>)
   existing.push(asset)
   await writeAssets(row.id, row.structured_strategy as Record<string, unknown>, existing)

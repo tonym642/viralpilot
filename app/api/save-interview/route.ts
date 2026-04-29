@@ -4,10 +4,14 @@
 */
 
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/src/lib/supabaseAdmin'
+import { withAuth, requireProjectOwnership } from '@/src/lib/api-auth'
 import { buildRawStrategyText, buildStructuredStrategy } from '@/src/lib/strategy'
 
 export async function POST(request: Request) {
+  const auth = await withAuth()
+  if ('error' in auth) return auth.error
+  const { supabase } = auth
+
   const body = await request.json()
   const { projectId, answers } = body
 
@@ -17,6 +21,9 @@ export async function POST(request: Request) {
       { status: 400 }
     )
   }
+
+  const ownershipError = await requireProjectOwnership(projectId, supabase)
+  if (ownershipError) return ownershipError
 
   const summary = [
     answers.goal && `Goal: ${answers.goal}`,
@@ -33,7 +40,6 @@ export async function POST(request: Request) {
   const rawStrategyText = buildRawStrategyText(answers)
   const structuredStrategy = buildStructuredStrategy(answers)
 
-  // Reset strategy status when strategy changes — requires re-audit
   const upsertData: Record<string, unknown> = {
     project_id: projectId,
     goal: answers.goal,
@@ -54,7 +60,7 @@ export async function POST(request: Request) {
     updated_at: new Date().toISOString(),
   }
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabase
     .from('project_interviews')
     .upsert(upsertData, { onConflict: 'project_id' })
     .select()
@@ -68,13 +74,12 @@ export async function POST(request: Request) {
     )
   }
 
-  // Save song_style and lyrics_text to the projects table if provided
   const projectUpdate: Record<string, unknown> = {}
   if (answers.song_style) projectUpdate.song_style = answers.song_style
   if (answers.lyrics_text) projectUpdate.lyrics_text = answers.lyrics_text
 
   if (Object.keys(projectUpdate).length > 0) {
-    await supabaseAdmin
+    await supabase
       .from('projects')
       .update(projectUpdate)
       .eq('id', projectId)

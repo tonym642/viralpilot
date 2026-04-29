@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { withAuth, requireProjectOwnership } from '@/src/lib/api-auth'
 import { uploadProjectAsset } from '@/src/lib/assetHelpers'
 import type { AssetType, AssetCategory, SourceStep } from '@/src/lib/assetTypes'
 
@@ -18,6 +19,10 @@ const ALLOWED_MIME: Record<string, AssetType> = {
 
 export async function POST(request: Request) {
   try {
+    const auth = await withAuth()
+    if ('error' in auth) return auth.error
+    const { user, supabase } = auth
+
     const formData = await request.formData()
     const file = formData.get('file') as File | null
     const projectId = formData.get('projectId') as string | null
@@ -29,6 +34,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'file and projectId are required' }, { status: 400 })
     }
 
+    const ownershipError = await requireProjectOwnership(projectId, supabase)
+    if (ownershipError) return ownershipError
+
     const mimeType = file.type
     const assetType = ALLOWED_MIME[mimeType]
     if (!assetType) {
@@ -39,6 +47,7 @@ export async function POST(request: Request) {
 
     const asset = await uploadProjectAsset({
       projectId,
+      userId: user.id,
       file: buffer,
       assetName,
       originalFileName: file.name,

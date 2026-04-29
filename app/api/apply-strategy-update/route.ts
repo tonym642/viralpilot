@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/src/lib/supabaseAdmin'
+import { withAuth, requireProjectOwnership } from '@/src/lib/api-auth'
 import { buildRawStrategyText, buildStructuredStrategy, generateAiInsights } from '@/src/lib/strategy'
 
 const VALID_FIELDS = ['goal', 'audience', 'tone', 'content_style', 'platform_focus', 'cta', 'song_meaning', 'differentiator', 'assets_preference']
 
 export async function POST(request: Request) {
+  const auth = await withAuth()
+  if ('error' in auth) return auth.error
+  const { supabase } = auth
+
   const body = await request.json()
   const { projectId, field, value } = body
 
@@ -22,8 +26,10 @@ export async function POST(request: Request) {
     )
   }
 
-  // Fetch current interview data
-  const { data: interview, error: fetchError } = await supabaseAdmin
+  const ownershipError = await requireProjectOwnership(projectId, supabase)
+  if (ownershipError) return ownershipError
+
+  const { data: interview, error: fetchError } = await supabase
     .from('project_interviews')
     .select('*')
     .eq('project_id', projectId)
@@ -36,13 +42,11 @@ export async function POST(request: Request) {
     )
   }
 
-  // Build updated answers
   const updatedAnswers: Record<string, string> = {}
   for (const f of VALID_FIELDS) {
     updatedAnswers[f] = f === field ? value : (interview[f] || '')
   }
 
-  // Rebuild strategy text and structure
   const rawStrategyText = buildRawStrategyText(updatedAnswers)
   const structuredStrategy = buildStructuredStrategy(updatedAnswers)
 
@@ -57,10 +61,8 @@ export async function POST(request: Request) {
     updatedAnswers.differentiator && `Differentiator: ${updatedAnswers.differentiator}`,
   ].filter(Boolean).join('. ')
 
-  // Regenerate AI insights
   const insights = await generateAiInsights(updatedAnswers)
 
-  // Update the interview record
   const updateData: Record<string, unknown> = {
     [field]: value,
     context_summary: summary,
@@ -72,7 +74,7 @@ export async function POST(request: Request) {
     updateData.ai_insights = insights
   }
 
-  const { data: updated, error: updateError } = await supabaseAdmin
+  const { data: updated, error: updateError } = await supabase
     .from('project_interviews')
     .update(updateData)
     .eq('project_id', projectId)

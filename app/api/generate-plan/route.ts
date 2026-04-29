@@ -12,10 +12,14 @@
   );
 */
 
-import { supabaseAdmin } from '@/src/lib/supabaseAdmin'
+import { withAuth, requireProjectOwnership } from '@/src/lib/api-auth'
 import { buildStrategyPromptBlock, buildMusicContextPromptBlock, buildInsightsPromptBlock, isMusicMode, type StructuredStrategy, type AiInsights } from '@/src/lib/strategy'
 
 export async function POST(request: Request) {
+  const auth = await withAuth()
+  if ('error' in auth) return auth.error
+  const { supabase } = auth
+
   const body = await request.json()
   const { projectId, projectName, description } = body
 
@@ -26,8 +30,10 @@ export async function POST(request: Request) {
     )
   }
 
-  // Fetch project mode and lyrics from the project record
-  const { data: proj } = await supabaseAdmin
+  const ownershipError = await requireProjectOwnership(projectId, supabase)
+  if (ownershipError) return ownershipError
+
+  const { data: proj } = await supabase
     .from('projects')
     .select('mode, lyrics_text, song_style')
     .eq('id', projectId)
@@ -35,8 +41,7 @@ export async function POST(request: Request) {
 
   const projectMode = proj?.mode || null
 
-  // Fetch strategy data and AI insights for this project
-  const { data: interview } = await supabaseAdmin
+  const { data: interview } = await supabase
     .from('project_interviews')
     .select('raw_strategy_text, structured_strategy, context_summary, ai_insights')
     .eq('project_id', projectId)
@@ -49,7 +54,6 @@ export async function POST(request: Request) {
   const strategyBlock = buildStrategyPromptBlock(rawStrategy, structured)
   const insightsBlock = buildInsightsPromptBlock(insights)
 
-  // Include lyrics for Music mode projects
   let musicBlock = ''
   if (isMusicMode(projectMode)) {
     musicBlock = buildMusicContextPromptBlock(proj?.lyrics_text || null, proj?.song_style || null)
@@ -118,8 +122,7 @@ Rules:
     )
   }
 
-  // Delete existing plans for this project before inserting new ones
-  await supabaseAdmin
+  await supabase
     .from('content_plans')
     .delete()
     .eq('project_id', projectId)
@@ -132,7 +135,7 @@ Rules:
     platform: item.platform,
   }))
 
-  const { error: insertError } = await supabaseAdmin
+  const { error: insertError } = await supabase
     .from('content_plans')
     .insert(rows)
 

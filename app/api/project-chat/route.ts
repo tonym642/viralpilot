@@ -1,4 +1,4 @@
-import { supabaseAdmin } from '@/src/lib/supabaseAdmin'
+import { withAuth, requireProjectOwnership } from '@/src/lib/api-auth'
 import { buildStrategyPromptBlock, buildInsightsPromptBlock, buildMusicContextPromptBlock, isMusicMode, type StructuredStrategy, type AiInsights } from '@/src/lib/strategy'
 
 const STRATEGY_FIELDS = ['goal', 'audience', 'tone', 'content_style', 'platform_focus', 'cta', 'song_meaning', 'differentiator', 'assets_preference']
@@ -14,6 +14,10 @@ function looksLikeRecommendationRequest(message: string): boolean {
 }
 
 export async function POST(request: Request) {
+  const auth = await withAuth()
+  if ('error' in auth) return auth.error
+  const { supabase } = auth
+
   const body = await request.json()
   const { projectId, message } = body
 
@@ -24,8 +28,10 @@ export async function POST(request: Request) {
     )
   }
 
-  // Save user message
-  const { error: insertError } = await supabaseAdmin
+  const ownershipError = await requireProjectOwnership(projectId, supabase)
+  if (ownershipError) return ownershipError
+
+  const { error: insertError } = await supabase
     .from('project_messages')
     .insert({ project_id: projectId, role: 'user', content: message })
 
@@ -37,20 +43,19 @@ export async function POST(request: Request) {
     )
   }
 
-  // Load project context
   const [{ data: proj }, { data: interview }, { data: recentMessages }] = await Promise.all([
-    supabaseAdmin
+    supabase
       .from('projects')
       .select('name, mode, description, lyrics_text, song_style')
       .eq('id', projectId)
       .single(),
-    supabaseAdmin
+    supabase
       .from('project_interviews')
       .select('raw_strategy_text, structured_strategy, ai_insights, context_summary')
       .eq('project_id', projectId)
       .limit(1)
       .single(),
-    supabaseAdmin
+    supabase
       .from('project_messages')
       .select('role, content')
       .eq('project_id', projectId)
@@ -58,7 +63,6 @@ export async function POST(request: Request) {
       .limit(50),
   ])
 
-  // Build context blocks
   const rawStrategy = interview?.raw_strategy_text || interview?.context_summary || null
   const structured = (interview?.structured_strategy as StructuredStrategy) || null
   const insights = (interview?.ai_insights as AiInsights) || null
@@ -143,7 +147,6 @@ ${contextSections}`
   const openaiData = await openaiRes.json()
   const rawReply = openaiData.choices?.[0]?.message?.content || 'No response.'
 
-  // Try to parse structured recommendations
   let reply = rawReply
   let recommendations = null
 
@@ -163,12 +166,11 @@ ${contextSections}`
     }
   }
 
-  // Save assistant reply — embed recommendations as a JSON tag if present
   const savedContent = recommendations
     ? `${reply}\n<!--RECS:${JSON.stringify(recommendations)}-->`
     : reply
 
-  await supabaseAdmin
+  await supabase
     .from('project_messages')
     .insert({ project_id: projectId, role: 'assistant', content: savedContent })
 

@@ -18,7 +18,7 @@
 */
 
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/src/lib/supabaseAdmin'
+import { withAuth, requireProjectOwnership } from '@/src/lib/api-auth'
 import { buildStrategyPromptBlock, buildMusicContextPromptBlock, buildInsightsPromptBlock, isMusicMode, type StructuredStrategy, type AiInsights } from '@/src/lib/strategy'
 
 function parseSection(raw: string, key: string, nextKey: string | null): string {
@@ -30,6 +30,10 @@ function parseSection(raw: string, key: string, nextKey: string | null): string 
 }
 
 export async function POST(request: Request) {
+  const auth = await withAuth()
+  if ('error' in auth) return auth.error
+  const { supabase } = auth
+
   const body = await request.json()
   const { projectId, projectName, description, day, title, platform } = body
 
@@ -40,8 +44,10 @@ export async function POST(request: Request) {
     )
   }
 
-  // Fetch project mode and lyrics from the project record
-  const { data: proj } = await supabaseAdmin
+  const ownershipError = await requireProjectOwnership(projectId, supabase)
+  if (ownershipError) return ownershipError
+
+  const { data: proj } = await supabase
     .from('projects')
     .select('mode, lyrics_text, song_style')
     .eq('id', projectId)
@@ -49,8 +55,7 @@ export async function POST(request: Request) {
 
   const projectMode = proj?.mode || null
 
-  // Fetch strategy data and AI insights for this project
-  const { data: interview } = await supabaseAdmin
+  const { data: interview } = await supabase
     .from('project_interviews')
     .select('raw_strategy_text, structured_strategy, context_summary, ai_insights')
     .eq('project_id', projectId)
@@ -63,7 +68,6 @@ export async function POST(request: Request) {
   const strategyBlock = buildStrategyPromptBlock(rawStrategy, structured)
   const insightsBlock = buildInsightsPromptBlock(insights)
 
-  // Include lyrics for Music mode projects
   let musicBlock = ''
   if (isMusicMode(projectMode)) {
     musicBlock = buildMusicContextPromptBlock(proj?.lyrics_text || null, proj?.song_style || null)
@@ -125,7 +129,7 @@ VISUAL_DIRECTION:
   const hashtags = parseSection(content, keys[3], keys[4])
   const visual_direction = parseSection(content, keys[4], null)
 
-  const { data: saved, error: insertError } = await supabaseAdmin
+  const { data: saved, error: insertError } = await supabase
     .from('content_items')
     .upsert(
       {

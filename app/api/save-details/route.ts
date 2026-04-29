@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/src/lib/supabaseAdmin'
+import { withAuth, requireProjectOwnership } from '@/src/lib/api-auth'
 
 export async function POST(request: Request) {
+  const auth = await withAuth()
+  if ('error' in auth) return auth.error
+  const { supabase } = auth
+
   const body = await request.json()
   const { projectId, details } = body
 
@@ -12,8 +16,10 @@ export async function POST(request: Request) {
     )
   }
 
-  // Check if an interview row already exists for this project
-  const { data: existing } = await supabaseAdmin
+  const ownershipError = await requireProjectOwnership(projectId, supabase)
+  if (ownershipError) return ownershipError
+
+  const { data: existing } = await supabase
     .from('project_interviews')
     .select('id, structured_strategy')
     .eq('project_id', projectId)
@@ -22,11 +28,10 @@ export async function POST(request: Request) {
   const row = existing?.[0]
 
   if (row) {
-    // Merge details into structured_strategy, preserving other keys
     const current = (row.structured_strategy as Record<string, unknown>) ?? {}
     const merged = { ...current, project_details: details }
 
-    const { error } = await supabaseAdmin
+    const { error } = await supabase
       .from('project_interviews')
       .update({ structured_strategy: merged })
       .eq('id', row.id)
@@ -36,8 +41,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Failed to save details' }, { status: 500 })
     }
   } else {
-    // Create a new interview row with the details
-    const { error } = await supabaseAdmin
+    const { error } = await supabase
       .from('project_interviews')
       .insert({
         project_id: projectId,

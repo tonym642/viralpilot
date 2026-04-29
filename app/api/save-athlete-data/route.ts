@@ -1,21 +1,22 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { withAuth, requireProjectOwnership } from '@/src/lib/api-auth'
 
 export async function POST(request: Request) {
   try {
+    const auth = await withAuth()
+    if ('error' in auth) return auth.error
+    const { supabase } = auth
+
     const { projectId, section, data } = await request.json()
 
     if (!projectId || !section || !data) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
     }
 
-    // Fetch existing interview row (or create one)
-    const { data: existing } = await supabaseAdmin
+    const ownershipError = await requireProjectOwnership(projectId, supabase)
+    if (ownershipError) return ownershipError
+
+    const { data: existing } = await supabase
       .from('project_interviews')
       .select('id, structured_strategy')
       .eq('project_id', projectId)
@@ -25,7 +26,7 @@ export async function POST(request: Request) {
     const updatedData = { ...currentData, [`athlete_${section}`]: data }
 
     if (existing) {
-      const { error } = await supabaseAdmin
+      const { error } = await supabase
         .from('project_interviews')
         .update({
           structured_strategy: updatedData,
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
 
       if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     } else {
-      const { error } = await supabaseAdmin
+      const { error } = await supabase
         .from('project_interviews')
         .insert({
           project_id: projectId,

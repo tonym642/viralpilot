@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/src/lib/supabaseAdmin'
+import { withAuth, requireProjectOwnership } from '@/src/lib/api-auth'
 import { generateAiInsights } from '@/src/lib/strategy'
 
 const VALID_STATUSES = ['audited', 'approved']
 
 export async function POST(request: Request) {
+  const auth = await withAuth()
+  if ('error' in auth) return auth.error
+  const { supabase } = auth
+
   const body = await request.json()
   const { projectId, status } = body
 
@@ -15,14 +19,16 @@ export async function POST(request: Request) {
     )
   }
 
+  const ownershipError = await requireProjectOwnership(projectId, supabase)
+  if (ownershipError) return ownershipError
+
   const updateData: Record<string, unknown> = {
     strategy_status: status,
     updated_at: new Date().toISOString(),
   }
 
-  // Generate AI insights when marking as audited
   if (status === 'audited') {
-    const { data: interview } = await supabaseAdmin
+    const { data: interview } = await supabase
       .from('project_interviews')
       .select('goal, audience, tone, content_style, platform_focus, cta, song_meaning, differentiator')
       .eq('project_id', projectId)
@@ -36,7 +42,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabase
     .from('project_interviews')
     .update(updateData)
     .eq('project_id', projectId)

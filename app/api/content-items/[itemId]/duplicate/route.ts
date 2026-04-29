@@ -1,14 +1,18 @@
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/src/lib/supabaseAdmin'
+import { withAuth } from '@/src/lib/api-auth'
 
 type RouteParams = {
   params: Promise<{ itemId: string }>
 }
 
 export async function POST(_request: Request, { params }: RouteParams) {
+  const auth = await withAuth()
+  if ('error' in auth) return auth.error
+  const { supabase } = auth
+
   const { itemId } = await params
 
-  const { data: original, error: fetchError } = await supabaseAdmin
+  const { data: original, error: fetchError } = await supabase
     .from('content_items')
     .select('*')
     .eq('id', itemId)
@@ -22,7 +26,7 @@ export async function POST(_request: Request, { params }: RouteParams) {
     )
   }
 
-  const { data: newItem, error: insertError } = await supabaseAdmin
+  const { data: newItem, error: insertError } = await supabase
     .from('content_items')
     .insert({
       project_id: original.project_id,

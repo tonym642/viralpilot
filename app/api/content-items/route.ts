@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { withAuth, requireProjectOwnership } from "@/src/lib/api-auth";
 
 export async function POST(req: Request) {
   try {
+    const auth = await withAuth();
+    if ("error" in auth) return auth.error;
+    const { supabase } = auth;
+
     const body = await req.json();
 
     const {
@@ -29,6 +28,9 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    const ownershipError = await requireProjectOwnership(projectId, supabase);
+    if (ownershipError) return ownershipError;
 
     const { data, error } = await supabase
       .from("content_items")
